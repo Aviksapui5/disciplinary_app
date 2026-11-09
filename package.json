@@ -7,10 +7,20 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^3",
-    "@sap/cds-dk": "^10"
+    "@sap/cds-dk": "^10",
+    "cds-plugin-ui5": "^0.17.0",
+    "rimraf": "^5.0.5",
+    "mbt": "^1.2.49"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "watch-disciplinary_case_app": "cds watch --open disciplinary.app.disciplinarycaseapp/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "undeploy": "cf undeploy disciplinary_app --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
   },
-  "private": true
+  "private": true,
+  "workspaces": [
+    "app/*"
+  ]
 }

@@ -1,0 +1,1 @@
+using DisciplinaryAPIService as service from '../../srv/disciplinary-service';
