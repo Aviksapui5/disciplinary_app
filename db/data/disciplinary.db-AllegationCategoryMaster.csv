@@ -1,0 +1,15 @@
+
+categoryID,categoryCode,categoryName,categoryDescription,isActive
+CAT001,MISCONDUCT,Misconduct,Violation of workplace conduct policies,true
+CAT002,ATTENDANCE,Attendance Issues,Repeated absence or late attendance without authorization,true
+CAT003,INSUBORDINATION,Insubordination,Failure to follow reasonable management instructions,true
+CAT004,HARASSMENT,Harassment,Inappropriate or harassing behavior in the workplace,true
+CAT005,DISCRIMINATION,Discrimination,Unfair treatment based on protected characteristics,true
+CAT006,SAFETY,Health and Safety Violation,Failure to follow workplace health and safety procedures,true
+CAT007,CONFIDENTIALITY,Confidentiality Breach,Unauthorized disclosure of confidential information,true
+CAT008,FRAUD,Fraud or Dishonesty,Deliberate falsification or dishonest conduct,true
+CAT009,PERFORMANCE,Performance Related Misconduct,Failure to meet conduct related workplace obligations,true
+CAT010,COMPANY_POLICY,Company Policy Violation,Failure to comply with organizational policies,true
+CAT011,MISUSE_ASSETS,Misuse of Company Assets,Unauthorized or improper use of company property,true
+CAT012,CONFLICT_INTEREST,Conflict of Interest,Failure to disclose or manage a conflict of interest,true
+CAT013,OTHER,Other,Other disciplinary allegation categories,true

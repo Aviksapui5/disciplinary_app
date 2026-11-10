@@ -1,0 +1,17 @@
+
+departmentID,departmentName,parentDepartmentID,businessUnit,isActive
+DEPT001,Human Resources,,Corporate,true
+DEPT002,Employee Relations,DEPT001,Corporate,true
+DEPT003,Talent Acquisition,DEPT001,Corporate,true
+DEPT004,Information Technology,,Technology,true
+DEPT005,Application Development,DEPT004,Technology,true
+DEPT006,Infrastructure and Operations,DEPT004,Technology,true
+DEPT007,Finance,,Corporate,true
+DEPT008,Accounting,DEPT007,Corporate,true
+DEPT009,Sales and Marketing,,Commercial,true
+DEPT010,Sales Operations,DEPT009,Commercial,true
+DEPT011,Customer Support,,Operations,true
+DEPT012,Supply Chain,,Operations,true
+DEPT013,Procurement,DEPT012,Operations,true
+DEPT014,Legal and Compliance,,Corporate,true
+DEPT015,Research and Development,,Technology,true

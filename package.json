@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "type": "module.cjs",
   "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.16.2",
     "@sap/cds": "^10"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^3",
     "@sap/cds-dk": "^10",
     "cds-plugin-ui5": "^0.17.0",
-    "rimraf": "^5.0.5",
-    "mbt": "^1.2.49"
+    "mbt": "^1.2.49",
+    "rimraf": "^5.0.5"
   },
   "scripts": {
     "start": "cds-serve",
