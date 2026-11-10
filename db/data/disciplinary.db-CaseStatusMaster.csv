@@ -1,0 +1,10 @@
+statusCode,statusDescription,sequenceNumber,isActive,isTerminal,createdAt,createdBy,modifiedAt,modifiedBy
+OPENED,Case Opened,1,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+ALLEGATION_ISSUED,Allegation Issued,2,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+RESPONSE_PENDING,Employee Response Pending,3,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+UNDER_INVESTIGATION,Under Investigation,4,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+OUTCOME_PENDING,Outcome Pending,5,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+OUTCOME_ISSUED,Outcome Issued,6,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+CLOSED,Closed,7,true,true,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+REOPENED,Reopened,8,true,false,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
+DELETED_DUPLICATE,Deleted – Duplicate,9,true,true,2026-11-10T09:00:00Z,system,2026-11-10T09:00:00Z,system
