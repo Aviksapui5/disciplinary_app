@@ -1,0 +1,563 @@
+
+<mvc:View
+    controllerName="disciplinary.app.disciplinarycaseapp.controller.CreateEmployee"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:layout="sap.ui.layout">
+
+    <Page
+        id="createPage"
+        title="Create Disciplinary Case"
+          showNavButton="true" navButtonPress="onCancel">
+
+
+          
+
+                <content>
+                    <VBox  class="sapUiSmallMarginTop sapUiMediumMarginBeginEnd">
+
+                        <!-- ================================= -->
+                        <!-- STEP 1 : SELECT EMPLOYEE         -->
+                        <!-- ================================= -->
+
+                      
+<Panel
+    id="employeePanel"
+    headerText="1. Select employee"
+    class="sapUiSmallMarginBottom">
+
+    <content>
+
+        <VBox
+            width="100%"
+            class="sapUiResponsiveContentPadding">
+
+            
+            <!-- EMPLOYEE SELECTION -->
+            <HBox
+                width="100%"
+                alignItems="Center"
+                wrap="Wrap"
+                class="sapUiSmallMarginBottom">
+
+                <Label
+                    text="Employee"
+                    required="true"
+                    width="5rem"/>
+
+                <Input
+                    id="employeeInput"
+                    width="28rem"
+                    placeholder="Search by employee ID or name"
+                    valueHelpOnly="true"
+                    showValueHelp="true"
+                    valueHelpRequest=".onEmployeeValueHelp"
+                    value="{= ${case>/employee/employeeID}
+                        ? ${case>/employee/displayName}
+                        + ' (' + ${case>/employee/employeeID} + ')'
+                        : '' }"/>
+
+                <Button
+                    icon="sap-icon://decline"
+                    type="Transparent"
+                    tooltip="Remove selected employee"
+                    enabled="{= !!${case>/employee/employeeID} }"
+                    press=".onClearEmployee"
+                    class="sapUiTinyMarginBegin"/>
+
+            </HBox>
+
+
+
+            <!-- EMPLOYEE DETAILS -->
+            <layout:Grid
+                xmlns:layout="sap.ui.layout"
+                width="100%"
+                defaultSpan="XL6 L6 M6 S12"
+                hSpacing="2"
+                vSpacing="2"
+                visible="{= !!${case>/employee/employeeID} }">
+
+
+                <!-- ================================= -->
+                <!-- EMPLOYEE AVATAR                  -->
+                <!-- ================================= -->
+
+                <VBox
+                    alignItems="Center"
+                    justifyContent="Start"
+                    class="sapUiSmallMarginTop">
+
+                    <layoutData>
+                        <layout:GridData span="XL1 L2 M12 S12"/>
+                    </layoutData>
+
+                    <Avatar
+                        displaySize="XL"
+                        displayShape="Circle"
+                        backgroundColor="Accent6"
+                        initials="{path:'case>/employee/displayName',
+                            formatter:'.formatter.initials'}"/>
+
+                </VBox>
+
+
+                <!-- ================================= -->
+                <!-- EMPLOYEE INFORMATION             -->
+                <!-- ================================= -->
+
+                <VBox
+                    width="100%"
+                    class="sapUiSmallMarginTop">
+
+                    <layoutData>
+                        <layout:GridData span="XL5 L5 M6 S12"/>
+                    </layoutData>
+
+                    <Title
+                        text="Employee information"
+                        level="H5"
+                        class="sapUiSmallMarginBottom"/>
+
+
+                    <!-- EMPLOYEE ID -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Employee ID:"
+                            width="8rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/employeeID}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- NAME -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Name:"
+                            width="8rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/displayName}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- EMAIL -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Email:"
+                            width="8rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/email}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- DESIGNATION -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Designation:"
+                            width="8rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/position}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- EMPLOYMENT STATUS -->
+                    <HBox
+                        width="100%"
+                        alignItems="Center"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Status:"
+                            width="8rem"
+                            textAlign="Begin"/>
+
+                        <ObjectStatus
+                            text="{case>/employee/employmentStatus}"
+                            state="Success"
+                            inverted="true"
+                            visible="{= !!${case>/employee/employmentStatus} }"/>
+
+                    </HBox>
+
+                </VBox>
+
+
+                <!-- ================================= -->
+                <!-- ORGANIZATION INFORMATION         -->
+                <!-- ================================= -->
+
+                <VBox
+                    width="100%"
+                    class="sapUiSmallMarginTop">
+
+                    <layoutData>
+                        <layout:GridData span="XL6 L5 M6 S12"/>
+                    </layoutData>
+
+                    <Title
+                        text="Organization"
+                        level="H5"
+                        class="sapUiSmallMarginBottom"/>
+
+
+                    <!-- DEPARTMENT -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Department:"
+                            width="9rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{= ${case>/employee/departmentID}
+                                ? ${case>/employee/departmentID}
+                                  + ' - '
+                                  + ${case>/employee/departmentName}
+                                : '' }"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- LOCATION -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Location:"
+                            width="9rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/location}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- COMPANY CODE -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Company code:"
+                            width="9rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/companyCode}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- LINE MANAGER -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Line manager:"
+                            width="9rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{case>/employee/managerID}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+
+                    <!-- HIRE DATE -->
+                    <HBox
+                        width="100%"
+                        alignItems="Start"
+                        class="sapUiTinyMarginBottom">
+
+                        <Label
+                            text="Hire date:"
+                            width="9rem"
+                            textAlign="Begin"/>
+
+                        <Text
+                            text="{path:'case>/employee/hireDate',
+                                type:'sap.ui.model.type.Date',
+                                formatOptions:{
+                                    source:{pattern:'yyyy-MM-dd'},
+                                    style:'medium'
+                                }}"
+                            wrapping="true"
+                            width="100%"/>
+
+                    </HBox>
+
+                </VBox>
+
+            </layout:Grid>
+
+        </VBox>
+
+    </content>
+
+</Panel>
+
+
+
+                        <!-- ================================= -->
+                        <!-- STEP 2 : CASE DETAILS             -->
+                        <!-- ================================= -->
+
+                        <Panel
+                            id="caseDetailsPanel"
+                            headerText="2. Case details"
+                            class="sapUiSmallMarginBottom">
+
+                            <content>
+                                <VBox class="sapUiSmallMargin">
+
+                                    <!-- ALLEGATION AND DATES -->
+                                    <layout:Grid
+                                        width="100%"
+                                        defaultSpan="XL6 L6 M6 S12"
+                                        hSpacing="2"
+                                        vSpacing="1">
+
+                                        <!-- ALLEGATION SECTION -->
+                                        <VBox width="100%">
+
+                                            <Title
+                                                text="Allegation"
+                                                level="H5"
+                                                class="sapUiSmallMarginBottom"/>
+
+                                            <form:SimpleForm
+                                                editable="true"
+                                                layout="ResponsiveGridLayout"
+                                                labelSpanXL="12"
+                                                labelSpanL="12"
+                                                labelSpanM="12"
+                                                labelSpanS="12"
+                                                emptySpanXL="0"
+                                                emptySpanL="0"
+                                                emptySpanM="0"
+                                                emptySpanS="0"
+                                                columnsXL="1"
+                                                columnsL="1"
+                                                columnsM="1"
+                                                singleContainerFullSize="true">
+
+                                                <form:content>
+
+                                                    <Label
+                                                        text="Allegation category"
+                                                        required="true"
+                                                        labelFor="categorySelect"/>
+
+                                                    <Select
+                                                        id="categorySelect"
+                                                        width="70%"
+                                                        forceSelection="false"
+                                                        selectedKey="{case>/categoryID}"
+                                                        items="{master>/categories}"
+                                                        change=".onCategoryChange">
+
+                                                        <core:Item
+                                                            key="{master>categoryID}"
+                                                            text="{master>categoryName}"/>
+
+                                                    </Select>
+
+                                                    <Label
+                                                        text="Incident location"
+                                                        labelFor="incidentLocation"/>
+
+                                                    <Input
+                                                        id="incidentLocation"
+                                                        width="70%"
+                                                        value="{case>/incidentLocation}"
+                                                        maxLength="150"
+                                                        placeholder="Enter incident location"/>
+
+                                                </form:content>
+
+                                            </form:SimpleForm>
+
+                                        </VBox>
+
+
+                                        <!-- DATES SECTION -->
+                                        <VBox width="100%">
+
+                                            <Title
+                                                text="Dates"
+                                                level="H5"
+                                                class="sapUiSmallMarginBottom"/>
+
+                                            <form:SimpleForm
+                                                editable="true"
+                                                layout="ResponsiveGridLayout"
+                                                labelSpanXL="12"
+                                                labelSpanL="12"
+                                                labelSpanM="12"
+                                                labelSpanS="12"
+                                                emptySpanXL="0"
+                                                emptySpanL="0"
+                                                emptySpanM="0"
+                                                emptySpanS="0"
+                                                columnsXL="1"
+                                                columnsL="1"
+                                                columnsM="1"
+                                                singleContainerFullSize="true">
+
+                                                <form:content>
+
+                                                    <Label
+                                                        text="Incident date"
+                                                        required="true"
+                                                        labelFor="incidentDate"/>
+
+                                                    <DatePicker
+                                                        id="incidentDate"
+                                                        width="70%"
+                                                        value="{case>/incidentDate}"
+                                                        valueFormat="yyyy-MM-dd"
+                                                        displayFormat="medium"
+                                                        placeholder="Select incident date"/>
+
+                                                    <Label
+                                                        text="Reported date"
+                                                        required="true"
+                                                        labelFor="reportedDate"/>
+
+                                                    <DatePicker
+                                                        id="reportedDate"
+                                                        width="70%"
+                                                        value="{case>/reportedDate}"
+                                                        valueFormat="yyyy-MM-dd"
+                                                        displayFormat="medium"
+                                                        placeholder="Select reported date"/>
+
+                                                </form:content>
+
+                                            </form:SimpleForm>
+
+                                        </VBox>
+
+                                    </layout:Grid>
+
+
+                                    <!-- CASE DESCRIPTION -->
+                                    <VBox
+                                        width="90%"
+                                        class="sapUiLargeMarginBegin">
+
+                                        <Label
+                                            text="Case description:"
+                                            required="true"
+                                            labelFor="caseDescription"/>
+
+                                        <TextArea
+                                            id="caseDescription"
+                                            width="80%"
+                                            rows="5"
+                                            growing="true"
+                                            growingMaxLines="10"
+                                            maxLength="5000"
+                                            showExceededText="true"
+                                            value="{case>/caseDescription}"
+                                            placeholder="Describe the incident in detail"/>
+
+                                    </VBox>
+
+                                </VBox>
+                            </content>
+
+                        </Panel>
+
+                    </VBox>
+                </content>
+
+          
+
+     
+
+
+        <!-- ================================= -->
+        <!-- FOOTER ACTION BUTTONS             -->
+        <!-- ================================= -->
+
+        <footer>
+            <OverflowToolbar>
+
+                <ToolbarSpacer/>
+
+                <Button
+                    id="cancelButton"
+                    text="Cancel"
+                    type="Default"
+                    press=".onCancel"/>
+
+                <Button
+                    id="previewButton"
+                    text="Preview"
+                    icon="sap-icon://show"
+                    type="Emphasized"
+                    press=".onPreview"
+                    class="sapUiTinyMarginBegin"/>
+
+            </OverflowToolbar>
+        </footer>
+
+    </Page>
+
+</mvc:View>

@@ -1,0 +1,26 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <TableSelectDialog
+        title="Select Employee"
+        contentWidth="55rem"
+        growing="true"
+        items="{master>/employees}"
+        search=".onEmployeeSearch"
+        liveChange=".onEmployeeSearch"
+        confirm=".onEmployeeConfirm"
+        cancel=".onEmployeeDialogCancel">
+        <columns>
+            <Column><Text text="Employee ID"/></Column>
+            <Column><Text text="Name"/></Column>
+            <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Department"/></Column>
+            <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Designation"/></Column>
+        </columns>
+        <ColumnListItem type="Active">
+            <cells>
+                <ObjectIdentifier title="{master>employeeID}"/>
+                <Text text="{master>displayName}"/>
+                <Text text="{master>departmentName}"/>
+                <Text text="{master>position}"/>
+            </cells>
+        </ColumnListItem>
+    </TableSelectDialog>
+</core:FragmentDefinition>

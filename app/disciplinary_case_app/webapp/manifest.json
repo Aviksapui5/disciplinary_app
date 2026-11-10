@@ -104,21 +104,37 @@
         "async": true,
         "viewPath": "disciplinary.app.disciplinarycaseapp.view"
       },
+    
+      
       "routes": [
-        {
-          "name": "RouteDisciplinaryDisplay",
-          "pattern": ":?query:",
-          "target": [
-            "TargetDisciplinaryDisplay"
-          ]
-        }
+          {
+              "name": "RouteDisciplinaryDisplay",
+              "pattern": ":?query:",
+              "target": [
+                  "TargetDisciplinaryDisplay"
+              ]
+          },
+          {
+              "name": "RouteCreateEmployee",
+              "pattern": "createEmployee",
+              "target": [
+                  "TargetCreateEmployee"
+              ]
+          },
+          { "name": "RoutePreviewCase",    "pattern": "preview", "target": ["TargetPreviewCase"] }
       ],
       "targets": {
-        "TargetDisciplinaryDisplay": {
-          "id": "DisciplinaryDisplay",
-          "name": "DisciplinaryDisplay"
-        }
+          "TargetDisciplinaryDisplay": {
+              "id": "DisciplinaryDisplay",
+              "name": "DisciplinaryDisplay"
+          },
+          "TargetCreateEmployee": {
+              "id": "CreateEmployee",
+              "name": "CreateEmployee"
+          },
+           "TargetPreviewCase":    { "id": "PreviewCase",    "name": "PreviewCase" }
       }
+
     },
     "rootView": {
       "viewName": "disciplinary.app.disciplinarycaseapp.view.App",

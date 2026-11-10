@@ -1,7 +1,7 @@
 {
   "name": "disciplinary_app",
   "version": "1.0.0",
-  "type": "module",
+  "type": "module.cjs",
   "dependencies": {
     "@sap/cds": "^10"
   },

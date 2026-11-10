@@ -1,0 +1,95 @@
+<mvc:View
+    controllerName="disciplinary.app.disciplinarycaseapp.controller.PreviewCase"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+
+    <Page id="previewPage" title="Review Disciplinary Case"
+          showNavButton="true" navButtonPress=".onEdit">
+        <content>
+            <VBox class="sapUiResponsiveContentPadding sapUiMediumMarginBeginEnd">
+
+                <!-- Hero header -->
+                <Panel class="sapUiSmallMarginBottom">
+                    <HBox alignItems="Center" justifyContent="SpaceBetween">
+                        <HBox alignItems="Center">
+                            <Avatar displaySize="XL" class="sapUiMediumMarginEnd"
+                                    initials="{path:'case>/employee/displayName', formatter:'.formatter.initials'}"/>
+                            <VBox>
+                                <Title text="{case>/employee/displayName}" level="H2"/>
+                                <Text text="{case>/employee/position} • {case>/employee/departmentName}"/>
+                                <Text text="Employee ID: {case>/employee/employeeID}"/>
+                            </VBox>
+                        </HBox>
+                        <VBox alignItems="End">
+                            <ObjectStatus text="Draft – Not yet submitted" state="Warning"
+                                          icon="sap-icon://edit"/>
+                            <ObjectStatus text="{case>/categoryName}" state="Error"
+                                          icon="sap-icon://alert" class="sapUiTinyMarginTop"/>
+                        </VBox>
+                    </HBox>
+                </Panel>
+
+                <!-- Employee + Case info -->
+                <Panel headerText="Employee Information" class="sapUiSmallMarginBottom">
+                    <form:SimpleForm editable="false" layout="ResponsiveGridLayout"
+                        labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                        columnsXL="2" columnsL="2" columnsM="1">
+                        <form:content>
+                            <core:Title text="Personal"/>
+                            <Label text="Employee ID"/><Text text="{case>/employee/employeeID}"/>
+                            <Label text="Name"/><Text text="{case>/employee/displayName}"/>
+                            <Label text="Email"/><Text text="{case>/employee/email}"/>
+                            <Label text="Designation"/><Text text="{case>/employee/position}"/>
+                            <Label text="Status"/><Text text="{case>/employee/employmentStatus}"/>
+
+                            <core:Title text="Organization"/>
+                            <Label text="Department"/>
+                            <Text text="{case>/employee/departmentID} - {case>/employee/departmentName}"/>
+                            <Label text="Location"/><Text text="{case>/employee/location}"/>
+                            <Label text="Company Code"/><Text text="{case>/employee/companyCode}"/>
+                            <Label text="Line Manager ID"/><Text text="{case>/employee/managerID}"/>
+                            <Label text="Hire Date"/>
+                            <Text text="{path:'case>/employee/hireDate', type:'sap.ui.model.type.Date',
+                                         formatOptions:{source:{pattern:'yyyy-MM-dd'}, style:'medium'}}"/>
+                        </form:content>
+                    </form:SimpleForm>
+                </Panel>
+
+                <Panel headerText="Case Information" class="sapUiSmallMarginBottom">
+                    <form:SimpleForm editable="false" layout="ResponsiveGridLayout"
+                        labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                        columnsXL="2" columnsL="2" columnsM="1">
+                        <form:content>
+                            <core:Title text="Allegation"/>
+                            <Label text="Category"/><Text text="{case>/categoryName}"/>
+                            <Label text="Incident Location"/><Text text="{case>/incidentLocation}"/>
+                            <core:Title text="Dates"/>
+                            <Label text="Incident Date"/>
+                            <Text text="{path:'case>/incidentDate', type:'sap.ui.model.type.Date',
+                                         formatOptions:{source:{pattern:'yyyy-MM-dd'}, style:'medium'}}"/>
+                            <Label text="Reported Date"/>
+                            <Text text="{path:'case>/reportedDate', type:'sap.ui.model.type.Date',
+                                         formatOptions:{source:{pattern:'yyyy-MM-dd'}, style:'medium'}}"/>
+                        </form:content>
+                    </form:SimpleForm>
+                </Panel>
+
+                <Panel headerText="Case Description" class="sapUiSmallMarginBottom">
+                    <Text text="{case>/caseDescription}"/>
+                </Panel>
+            </VBox>
+        </content>
+
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer/>
+                <Button text="Cancel" type="Reject" press=".onCancel"/>
+                <Button text="Edit" icon="sap-icon://edit" press=".onEdit"/>
+                <Button id="submitButton" text="Submit" icon="sap-icon://accept"
+                        type="Emphasized" press=".onSubmit"/>
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>
