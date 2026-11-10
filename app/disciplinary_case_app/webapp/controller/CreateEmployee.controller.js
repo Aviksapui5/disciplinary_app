@@ -33,28 +33,183 @@ sap.ui.define([
             this._pDialog.then(function (oDialog) { oDialog.open(); });
         },
 
-        onEmployeeSearch: function (oEvent) {
-            var sValue = oEvent.getParameter("value");
+        /* ---------- Employee Live Suggestions ---------- */
+
+        onEmployeeSuggest: function (oEvent) {
+
+            var sValue = (oEvent.getParameter("suggestValue") || "")
+                .trim();
+
+            var oInput = oEvent.getSource();
+
+            var oBinding = oInput.getBinding("suggestionItems");
+
+            if (!oBinding) {
+                return;
+            }
+
+            if (!sValue) {
+                oBinding.filter([]);
+                return;
+            }
+
             var oFilter = new Filter({
                 and: false,
                 filters: [
-                    new Filter("employeeID", FilterOperator.Contains, sValue),
-                    new Filter("displayName", FilterOperator.Contains, sValue),
-                    new Filter("departmentName", FilterOperator.Contains, sValue),
-                    new Filter("position", FilterOperator.Contains, sValue)
+
+                    new Filter(
+                        "employeeID",
+                        FilterOperator.Contains,
+                        sValue
+                    ),
+
+                    new Filter(
+                        "displayName",
+                        FilterOperator.Contains,
+                        sValue
+                    ),
+
+                    new Filter(
+                        "departmentName",
+                        FilterOperator.Contains,
+                        sValue
+                    ),
+
+                    new Filter(
+                        "position",
+                        FilterOperator.Contains,
+                        sValue
+                    )
+
                 ]
             });
-            oEvent.getSource().getBinding("items").filter(sValue ? [oFilter] : []);
+
+            oBinding.filter([oFilter]);
         },
 
-        onEmployeeConfirm: function (oEvent) {
-            var oItem = oEvent.getParameter("selectedItem");
-            if (!oItem) { return; }
-            var oEmp = oItem.getBindingContext("master").getObject();
-            this._oCase.setProperty("/employee", Object.assign({}, oEmp));
-            this.byId("employeeInput").setValueState("None");
-            oEvent.getSource().getBinding("items").filter([]);
+        /* ---------- Employee Suggestion Selection ---------- */
+
+        onEmployeeSuggestionSelected: function (oEvent) {
+
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+
+            if (!oSelectedItem) {
+                return;
+            }
+
+            var oEmp = oSelectedItem
+                .getBindingContext("master")
+                .getObject();
+
+            this._setSelectedEmployee(oEmp);
+
+            // Clear suggestion filters
+            var oBinding = oEvent.getSource()
+                .getBinding("suggestionItems");
+
+            if (oBinding) {
+                oBinding.filter([]);
+            }
+
+            MessageToast.show(
+                "Employee selected: " + oEmp.displayName
+            );
         },
+
+        /* ---------- Common Employee Selection ---------- */
+
+        _setSelectedEmployee: function (oEmp) {
+
+            this._oCase.setProperty(
+                "/employee",
+                Object.assign({}, oEmp)
+            );
+
+            this.byId("employeeInput").setValueState("None");
+        },
+
+
+        // onEmployeeSearch: function (oEvent) {
+        //     var sValue = oEvent.getParameter("value");
+        //     var oFilter = new Filter({
+        //         and: false,
+        //         filters: [
+        //             new Filter("employeeID", FilterOperator.Contains, sValue),
+        //             new Filter("displayName", FilterOperator.Contains, sValue),
+        //             new Filter("departmentName", FilterOperator.Contains, sValue),
+        //             new Filter("position", FilterOperator.Contains, sValue)
+        //         ]
+        //     });
+        //     oEvent.getSource().getBinding("items").filter(sValue ? [oFilter] : []);
+        // },
+
+        onEmployeeSearch: function (oEvent) {
+
+            var sValue = (oEvent.getParameter("value") || "").trim();
+
+            var oFilter = new Filter({
+                and: false,
+                filters: [
+                    new Filter(
+                        "employeeID",
+                        FilterOperator.Contains,
+                        sValue
+                    ),
+                    new Filter(
+                        "displayName",
+                        FilterOperator.Contains,
+                        sValue
+                    ),
+                    new Filter(
+                        "departmentName",
+                        FilterOperator.Contains,
+                        sValue
+                    ),
+                    new Filter(
+                        "position",
+                        FilterOperator.Contains,
+                        sValue
+                    )
+                ]
+            });
+
+            oEvent.getSource()
+                .getBinding("items")
+                .filter(sValue ? [oFilter] : []);
+        },
+
+
+        // onEmployeeConfirm: function (oEvent) {
+        //     var oItem = oEvent.getParameter("selectedItem");
+        //     if (!oItem) { return; }
+        //     var oEmp = oItem.getBindingContext("master").getObject();
+        //     this._oCase.setProperty("/employee", Object.assign({}, oEmp));
+        //     this.byId("employeeInput").setValueState("None");
+        //     oEvent.getSource().getBinding("items").filter([]);
+        // },
+
+        onEmployeeConfirm: function (oEvent) {
+
+            var oItem = oEvent.getParameter("selectedItem");
+
+            if (!oItem) {
+                return;
+            }
+
+            var oEmp = oItem
+                .getBindingContext("master")
+                .getObject();
+
+            this._setSelectedEmployee(oEmp);
+
+            // Reset dialog search filters
+            var oBinding = oEvent.getSource().getBinding("items");
+
+            if (oBinding) {
+                oBinding.filter([]);
+            }
+        },
+
 
         onEmployeeDialogCancel: function (oEvent) {
             oEvent.getSource().getBinding("items").filter([]);
