@@ -1,0 +1,17 @@
+
+employeeID,firstName,lastName,displayName,email,department_departmentID,managerID,position,companyCode,location,employmentStatus
+EMP1001,Avinash,Pawar,Avinash Pawar,avinash.pawar@example.com,DEPT004,EMP1010,Senior Software Engineer,VELORA,Pune,Active
+EMP1002,Rahul,Sharma,Rahul Sharma,rahul.sharma@example.com,DEPT005,EMP1001,Software Engineer,VELORA,Pune,Active
+EMP1003,Priya,Patil,Priya Patil,priya.patil@example.com,DEPT005,EMP1001,SAP UI5 Developer,VELORA,Pune,Active
+EMP1004,Amit,Kulkarni,Amit Kulkarni,amit.kulkarni@example.com,DEPT006,EMP1010,System Administrator,VELORA,Mumbai,Active
+EMP1005,Neha,Joshi,Neha Joshi,neha.joshi@example.com,DEPT002,EMP1011,HR Business Partner,VELORA,Pune,Active
+EMP1006,Sneha,Deshmukh,Sneha Deshmukh,sneha.deshmukh@example.com,DEPT003,EMP1011,Talent Acquisition Specialist,VELORA,Pune,Active
+EMP1007,Vikram,Desai,Vikram Desai,vikram.desai@example.com,DEPT007,EMP1012,Finance Analyst,VELORA,Mumbai,Active
+EMP1008,Pooja,Shinde,Pooja Shinde,pooja.shinde@example.com,DEPT008,EMP1007,Accountant,VELORA,Pune,Active
+EMP1009,Karan,Mehta,Karan Mehta,karan.mehta@example.com,DEPT009,EMP1013,Sales Executive,VELORA,Bangalore,Active
+EMP1010,Rajesh,Verma,Rajesh Verma,rajesh.verma@example.com,DEPT004,EMP1013,IT Manager,VELORA,Pune,Active
+EMP1011,Anita,Rao,Anita Rao,anita.rao@example.com,DEPT001,EMP1012,HR Manager,VELORA,Mumbai,Active
+EMP1012,Suresh,Naik,Suresh Naik,suresh.naik@example.com,,EMP1013,Department Head,VELORA,Pune,Active
+EMP1013,Manoj,Gupta,Manoj Gupta,manoj.gupta@example.com,,EMP1012,Director,VELORA,Mumbai,Active
+EMP1014,Deepak,Jadhav,Deepak Jadhav,deepak.jadhav@example.com,DEPT011,EMP1013,Customer Support Executive,VELORA,Pune,Active
+EMP1015,Meera,Shah,Meera Shah,meera.shah@example.com,DEPT012,EMP1013,Supply Chain Analyst,VELORA,Mumbai,Inactive

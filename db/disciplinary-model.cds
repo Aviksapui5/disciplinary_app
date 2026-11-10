@@ -6,6 +6,7 @@ using {
 } from '@sap/cds/common';
 
 entity DisciplinaryCase : cuid, managed {
+    caseID             : String(30) @assert.unique;
     caseReference      : String(30) not null;
     employee           : Association to EmployeeMaster not null;
     department         : Association to DepartmentMaster;

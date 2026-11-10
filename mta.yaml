@@ -3,121 +3,122 @@ ID: disciplinary_app
 description: A simple CAP project.
 version: 1.0.0
 modules:
-- name: disciplinary_app-srv
-  type: nodejs
-  path: gen/srv
-  requires:
-  - name: uaa_disciplinary_app
-  provides:
-  - name: srv-api
-    properties:
-      srv-url: ${default-url}
-  parameters:
-    buildpack: nodejs_buildpack
-    instances: 1
-  build-parameters:
-    builder: npm-ci
-- name: disciplinary_app-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: disciplinary_app-destination-service
-    parameters:
-      content-target: true
-  - name: disciplinary_app_html_repo_host
-    parameters:
-      service-key:
-        name: disciplinary_app_html_repo_host-key
-  - name: uaa_disciplinary_app
-    parameters:
-      service-key:
-        name: uaa_disciplinary_app-key
-  parameters:
-    content:
-      instance:
-        destinations:
-        - Name: disciplinary_apps_disciplinary_app_html_repo_host
-          ServiceInstanceName: disciplinary_app-html5-app-host-service
-          ServiceKeyName: disciplinary_app_html_repo_host-key
-          sap.cloud.service: disciplinary.apps
-        - Authentication: OAuth2UserTokenExchange
-          Name: disciplinary_apps_uaa_disciplinary_app
-          ServiceInstanceName: disciplinary_app-xsuaa-service
-          ServiceKeyName: uaa_disciplinary_app-key
-          sap.cloud.service: disciplinary.apps
-        existing_destinations_policy: ignore
-  build-parameters:
-    no-source: true
-- name: disciplinary_app-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-  - name: disciplinary_app_html_repo_host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: resources
+  - name: disciplinary_app-srv
+    type: nodejs
+    path: gen/srv
     requires:
-    - artifacts:
-      - disciplinaryappdisciplinarycaseapp.zip
-      name: disciplinaryappdisciplinarycaseapp
-      target-path: resources/
-- name: disciplinaryappdisciplinarycaseapp
-  type: html5
-  path: app/disciplinary_case_app
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-resources:
-- name: disciplinary_app-destination-service
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
+      - name: uaa_disciplinary_app
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+  - name: disciplinary_app-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: disciplinary_app-destination-service
+        parameters:
+          content-target: true
+      - name: disciplinary_app_html_repo_host
+        parameters:
+          service-key:
+            name: disciplinary_app_html_repo_host-key
+      - name: uaa_disciplinary_app
+        parameters:
+          service-key:
+            name: uaa_disciplinary_app-key
+    parameters:
+      content:
         instance:
           destinations:
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
-          - Authentication: NoAuthentication
-            HTML5.DynamicDestination: true
-            HTML5.ForwardAuthToken: true
-            Name: srv-api
-            ProxyType: Internet
-            Type: HTTP
-            URL: ~{srv-api/srv-url}
-          existing_destinations_policy: update
-      version: 1.0.0
-    service: destination
-    service-name: disciplinary_app-destination-service
-    service-plan: lite
-  requires:
-  - name: srv-api
-- name: disciplinary_app_html_repo_host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: disciplinary_app-html5-app-host-service
-    service-plan: app-host
-- name: uaa_disciplinary_app
-  type: org.cloudfoundry.managed-service
-  parameters:
-    path: ./xs-security.json
-    service: xsuaa
-    service-name: disciplinary_app-xsuaa-service
-    service-plan: application
+            - Name: disciplinary_apps_disciplinary_app_html_repo_host
+              ServiceInstanceName: disciplinary_app-html5-app-host-service
+              ServiceKeyName: disciplinary_app_html_repo_host-key
+              sap.cloud.service: disciplinary.apps
+            - Authentication: OAuth2UserTokenExchange
+              Name: disciplinary_apps_uaa_disciplinary_app
+              ServiceInstanceName: disciplinary_app-xsuaa-service
+              ServiceKeyName: uaa_disciplinary_app-key
+              sap.cloud.service: disciplinary.apps
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+  - name: disciplinary_app-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: disciplinary_app_html_repo_host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - disciplinaryappdisciplinarycaseapp.zip
+          name: disciplinaryappdisciplinarycaseapp
+          target-path: resources/
+  - name: disciplinaryappdisciplinarycaseapp
+    type: html5
+    path: app/disciplinary_case_app
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms:
+        []
+resources:
+  - name: disciplinary_app-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+              - Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+                Name: srv-api
+                ProxyType: Internet
+                Type: HTTP
+                URL: ~{srv-api/srv-url}
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: disciplinary_app-destination-service
+      service-plan: lite
+    requires:
+      - name: srv-api
+  - name: disciplinary_app_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: disciplinary_app-html5-app-host-service
+      service-plan: app-host
+  - name: uaa_disciplinary_app
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: disciplinary_app-xsuaa-service
+      service-plan: application
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
 build-parameters:
   before-all:
-  - builder: custom
-    commands:
-    - npm ci
-    - npx cds build --production
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
