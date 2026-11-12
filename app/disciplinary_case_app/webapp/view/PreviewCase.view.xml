@@ -85,10 +85,9 @@
         <footer>
             <OverflowToolbar>
                 <ToolbarSpacer/>
-                <Button text="Cancel" type="Reject" press=".onCancel"/>
+                <Button text="Cancel"  press=".onCancel"/>
                 <Button text="Edit" icon="sap-icon://edit" press=".onEdit"/>
-                <Button id="submitButton" text="Submit" icon="sap-icon://accept"
-                        type="Emphasized" press=".onSubmit"/>
+                <Button id="submitButton" text="Submit" type="Emphasized" press=".onSubmit"/>
             </OverflowToolbar>
         </footer>
     </Page>

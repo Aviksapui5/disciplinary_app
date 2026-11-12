@@ -1,0 +1,121 @@
+<mvc:View
+    controllerName="disciplinary.app.disciplinarycaseapp.controller.CaseDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    core:require="{ formatter: 'disciplinary/app/disciplinarycaseapp/model/formatter' }">
+
+    <Page
+        id="caseDetailPage"
+        title="{i18n>caseDetailTitle}"
+        showNavButton="true"
+        navButtonPress=".onNavBack"
+        busyIndicatorDelay="0">
+
+        <!-- Header summary -->
+        <ObjectHeader
+            title="{caseID}"
+            number="{caseReference}"
+            responsive="true"
+            backgroundDesign="Solid">
+            <statuses>
+                <ObjectStatus
+                    text="{path: 'status_statusCode', formatter: 'formatter.statusText'}"
+                    state="{path: 'status_statusCode', formatter: 'formatter.statusState'}"
+                    icon="{path: 'status_statusCode', formatter: 'formatter.statusIcon'}"
+                    inverted="true"/>
+            </statuses>
+            <attributes>
+                <ObjectAttribute title="{i18n>incidentDate}" text="{incidentDate}"/>
+                <ObjectAttribute title="{i18n>caseCategory}" text="{category_categoryID}"/>
+            </attributes>
+        </ObjectHeader>
+
+        <content>
+            <!-- General information -->
+            <Panel headerText="General Info" class="sapUiResponsiveMargin" width="auto">
+                <form:SimpleForm editable="false" layout="ColumnLayout"
+                    columnsM="2" columnsL="2" columnsXL="3">
+                    <Label text="{i18n>caseID}"/>
+                    <Text text="{caseID}"/>
+
+                    <Label text="{i18n>caseReference}"/>
+                    <Text text="{caseReference}"/>
+
+                    <Label text="{i18n>employeeID}"/>
+                    <Text text="{employee_employeeID}"/>
+
+                    <Label text="{i18n>department}"/>
+                    <Text text="{department_departmentID}"/>
+
+                    <Label text="{i18n>caseCategory}"/>
+                    <Text text="{category_categoryID}"/>
+
+                    <Label text="{i18n>caseStatus}"/>
+                    <ObjectStatus
+                        text="{path: 'status_statusCode', formatter: 'formatter.statusText'}"
+                        state="{path: 'status_statusCode', formatter: 'formatter.statusState'}"
+                        icon="{path: 'status_statusCode', formatter: 'formatter.statusIcon'}"/>
+                </form:SimpleForm>
+            </Panel>
+
+            <!-- Incident details -->
+            <Panel headerText="Incident Details" class="sapUiResponsiveMargin" width="auto">
+                <form:SimpleForm editable="false" layout="ColumnLayout"
+                    columnsM="2" columnsL="2" columnsXL="3">
+                    <Label text="{i18n>incidentDate}"/>
+                    <Text text="{incidentDate}"/>
+
+                    <Label text="{i18n>incidentLocation}"/>
+                    <Text text="{incidentLocation}"/>
+
+                    <Label text="{i18n>caseDescription}"/>
+                    <Text text="{caseDescription}"/>
+                </form:SimpleForm>
+            </Panel>
+
+            <!-- People and dates -->
+            <Panel headerText="People and Dates" class="sapUiResponsiveMargin" width="auto">
+                <form:SimpleForm editable="false" layout="ColumnLayout"
+                    columnsM="2" columnsL="2" columnsXL="3">
+                    <Label text="{i18n>lineManager}"/>
+                    <Text text="{lineManagerID}"/>
+
+                    <Label text="{i18n>hrbp}"/>
+                    <Text text="{hrbpID}"/>
+
+                    <Label text="{i18n>erCaseManager}"/>
+                    <Text text="{erCaseManagerID}"/>
+
+                    <Label text="{i18n>allegationIssuedAt}"/>
+                    <Text text="{allegationIssuedAt}"/>
+
+                    <Label text="{i18n>caseClosedAt}"/>
+                    <Text text="{caseClosedAt}"/>
+
+                    <Label text="{i18n>reopenReason}"/>
+                    <Text text="{reopenReason}"/>
+                </form:SimpleForm>
+            </Panel>
+
+            <!-- Audit information -->
+            <Panel headerText="Audit Information" class="sapUiResponsiveMargin" width="auto">
+                <form:SimpleForm editable="false" layout="ColumnLayout"
+                    columnsM="2" columnsL="2" columnsXL="3">
+                    <Label text="{i18n>createdBy}"/>
+                    <Text text="{createdBy}"/>
+
+                    <Label text="{i18n>createdAt}"/>
+                    <Text text="{createdAt}"/>
+
+                    <Label text="{i18n>modifiedBy}"/>
+                    <Text text="{modifiedBy}"/>
+
+                    <Label text="{i18n>modifiedAt}"/>
+                    <Text text="{modifiedAt}"/>
+                </form:SimpleForm>
+            </Panel>
+        </content>
+    </Page>
+</mvc:View>

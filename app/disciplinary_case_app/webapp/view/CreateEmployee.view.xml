@@ -26,42 +26,6 @@
                                 <VBox
                                     width="100%"
                                     class="sapUiResponsiveContentPadding">
-
-                                    
-                                    <!-- EMPLOYEE SELECTION -->
-                                    <!-- <HBox
-                                        width="100%"
-                                        alignItems="Center"
-                                        wrap="Wrap"
-                                        class="sapUiSmallMarginTopBottom">
-
-                                        <Label
-                                            text="Employee"
-                                            required="true"
-                                            width="5rem"/>
-
-                                        <Input
-                                            id="employeeInput"
-                                            width="28rem"
-                                            placeholder="Search by employee ID or name"
-                                            valueHelpOnly="true"
-                                            showValueHelp="true"
-                                            valueHelpRequest=".onEmployeeValueHelp"
-                                            value="{= ${case>/employee/employeeID}
-                                                ? ${case>/employee/displayName}
-                                                + ' (' + ${case>/employee/employeeID} + ')'
-                                                : '' }"/>
-
-                                        <Button
-                                            icon="sap-icon://decline"
-                                            type="Transparent"
-                                            tooltip="Remove selected employee"
-                                            enabled="{= !!${case>/employee/employeeID} }"
-                                            press=".onClearEmployee"
-                                            class="sapUiTinyMarginBegin"/>
-
-                                    </HBox> -->
-
                                     <!-- EMPLOYEE SELECTION -->
                                     <HBox
                                         width="100%"
@@ -74,7 +38,7 @@
                                             required="true"
                                             width="5rem"/>
 
-                                        <Input
+                                        <!-- <Input
                                             id="employeeInput"
                                             placeholder="Search by ID Or name"
                                             showSuggestion="true"
@@ -105,6 +69,25 @@
                                                     description="{master>employeeID} | {master>departmentName} | {master>position}"/>
                                             </suggestionItems>
 
+                                        </Input> -->
+                                        <Input
+                                            id="employeeInput"
+                                            placeholder="Search by ID Or name"
+                                            showSuggestion="true"
+                                            filterSuggests="false"
+                                            startSuggestion="1"
+                                            showValueHelp="true"
+                                            valueHelpOnly="false"
+                                            valueHelpRequest=".onEmployeeValueHelp"
+                                            suggest=".onEmployeeSuggest"
+                                            suggestionItemSelected=".onEmployeeSuggestionSelected"
+                                            value="{= ${case>/employee/employeeID}
+                                                ? ${case>/employee/displayName}
+                                                + ' (' + ${case>/employee/employeeID} + ')'
+                                                : '' }">
+                                            <layoutData>
+                                                <FlexItemData growFactor="0" shrinkFactor="1" baseSize="28rem"/>
+                                            </layoutData>
                                         </Input>
 
                                         <Button
@@ -445,18 +428,33 @@
                                                                     labelFor="categorySelect"/>
                                                             </form:label>
 
-                                                            <form:fields>
+                                                           <form:fields>
                                                                 <Select
                                                                     id="categorySelect"
                                                                     width="75%"
                                                                     forceSelection="false"
                                                                     selectedKey="{case>/categoryID}"
-                                                                    items="{master>/categories}"
                                                                     change=".onCategoryChange">
 
                                                                     <core:Item
-                                                                        key="{master>categoryID}"
-                                                                        text="{master>categoryName}"/>
+                                                                        key="C01"
+                                                                        text="Absenteeism"/>
+
+                                                                    <core:Item
+                                                                        key="C02"
+                                                                        text="Misconduct"/>
+
+                                                                    <core:Item
+                                                                        key="C03"
+                                                                        text="Harassment"/>
+
+                                                                    <core:Item
+                                                                        key="C04"
+                                                                        text="Policy Violation"/>
+
+                                                                    <core:Item
+                                                                        key="C05"
+                                                                        text="Performance"/>
 
                                                                 </Select>
                                                             </form:fields>

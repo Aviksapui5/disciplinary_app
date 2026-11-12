@@ -5,17 +5,106 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "sap/m/MessageBox",
     "sap/m/MessageToast",
+    "sap/m/SuggestionItem",
     "disciplinary/app/disciplinarycaseapp/model/DummyData",
     "disciplinary/app/disciplinarycaseapp/model/formatter"
-], function (Controller, Fragment, Filter, FilterOperator, MessageBox, MessageToast, DummyData, formatter) {
+], function (Controller, Fragment, Filter, FilterOperator, MessageBox, MessageToast,
+    SuggestionItem, DummyData, formatter) {
     "use strict";
+
+    // all fields we need when an employee is selected
+    var EMP_SELECT = "employeeID,firstName,lastName,displayName,email,position," +
+        "managerID,companyCode,location,employmentStatus,hireDate,department_departmentID";
 
     return Controller.extend("disciplinary.app.disciplinarycaseapp.controller.CreateEmployee", {
 
         formatter: formatter,
 
         onInit: function () {
+
             this._oCase = this.getOwnerComponent().getModel("case");
+
+            var oEmployeeInput = this.byId("employeeInput");
+
+            oEmployeeInput.bindAggregation("suggestionItems", {
+
+                path: "/Employees",
+
+                parameters: {
+                    $select: EMP_SELECT,
+                    $expand: "department"
+                },
+
+                template: new SuggestionItem({
+
+                    key: "{employeeID}",
+
+                    text: "{= ${employeeID} + ' - ' + ${displayName} }",
+
+                    description: "{= ${department/departmentName} + ' | ' + ${position} }"
+
+                }),
+
+                templateShareable: false
+            });
+        },
+        /* ---------- Filter builder (shared) ---------- */
+        _buildEmployeeFilter: function (sValue) {
+
+            var aTokens = sValue.split(/\s+/).filter(Boolean);
+
+            // Employee ID: exact or partial match
+            var aFilters = [
+                new Filter(
+                    "employeeID",
+                    FilterOperator.EQ,
+                    sValue
+                ),
+                new Filter(
+                    "employeeID",
+                    FilterOperator.Contains,
+                    sValue
+                )
+            ];
+
+            // Name search: every word must match at least one name field
+            var aNameFilters = aTokens.map(function (sToken) {
+
+                return new Filter({
+                    filters: [
+                        new Filter(
+                            "displayName",
+                            FilterOperator.Contains,
+                            sToken
+                        ),
+                        new Filter(
+                            "firstName",
+                            FilterOperator.Contains,
+                            sToken
+                        ),
+                        new Filter(
+                            "lastName",
+                            FilterOperator.Contains,
+                            sToken
+                        )
+                    ],
+                    and: false
+                });
+
+            });
+
+            if (aNameFilters.length) {
+
+                aFilters.push(new Filter({
+                    filters: aNameFilters,
+                    and: true
+                }));
+            }
+
+            return new Filter({
+                filters: aFilters,
+                and: false
+            });
         },
 
         /* ---------- Value help ---------- */
@@ -33,61 +122,33 @@ sap.ui.define([
             this._pDialog.then(function (oDialog) { oDialog.open(); });
         },
 
-        /* ---------- Employee Live Suggestions ---------- */
-
+        /* ---------- Live suggestions ---------- */
         onEmployeeSuggest: function (oEvent) {
 
-            var sValue = (oEvent.getParameter("suggestValue") || "")
-                .trim();
+            var sValue = (
+                oEvent.getParameter("suggestValue") ||
+                oEvent.getSource().getValue() ||
+                ""
+            ).trim();
 
-            var oInput = oEvent.getSource();
-
-            var oBinding = oInput.getBinding("suggestionItems");
+            var oBinding = oEvent.getSource()
+                .getBinding("suggestionItems");
 
             if (!oBinding) {
                 return;
             }
 
-            if (!sValue) {
+            if (sValue.length > 0) {
+
+                var oFilter = this._buildEmployeeFilter(sValue);
+
+                oBinding.filter([oFilter]);
+
+            } else {
+
                 oBinding.filter([]);
-                return;
             }
-
-            var oFilter = new Filter({
-                and: false,
-                filters: [
-
-                    new Filter(
-                        "employeeID",
-                        FilterOperator.Contains,
-                        sValue
-                    ),
-
-                    new Filter(
-                        "displayName",
-                        FilterOperator.Contains,
-                        sValue
-                    ),
-
-                    new Filter(
-                        "departmentName",
-                        FilterOperator.Contains,
-                        sValue
-                    ),
-
-                    new Filter(
-                        "position",
-                        FilterOperator.Contains,
-                        sValue
-                    )
-
-                ]
-            });
-
-            oBinding.filter([oFilter]);
         },
-
-        /* ---------- Employee Suggestion Selection ---------- */
 
         onEmployeeSuggestionSelected: function (oEvent) {
 
@@ -97,13 +158,16 @@ sap.ui.define([
                 return;
             }
 
-            var oEmp = oSelectedItem
-                .getBindingContext("master")
-                .getObject();
+            var oContext = oSelectedItem.getBindingContext();
 
-            this._setSelectedEmployee(oEmp);
+            if (!oContext) {
+                return;
+            }
 
-            // Clear suggestion filters
+            var oEmp = this._setSelectedEmployee(
+                oContext.getObject()
+            );
+
             var oBinding = oEvent.getSource()
                 .getBinding("suggestionItems");
 
@@ -112,113 +176,58 @@ sap.ui.define([
             }
 
             MessageToast.show(
-                "Employee selected: " + oEmp.displayName
+                "Employee selected: " +
+                oEmp.employeeID + " - " +
+                oEmp.displayName
             );
         },
 
-        /* ---------- Common Employee Selection ---------- */
+        /* ---------- Map OData entity -> flat "case>/employee" structure ---------- */
+        _setSelectedEmployee: function (oData) {
+            var oEmp = {
+                employeeID: oData.employeeID,
+                firstName: oData.firstName,
+                lastName: oData.lastName,
+                displayName: oData.displayName,
+                email: oData.email,
+                position: oData.position,
+                managerID: oData.managerID,
+                companyCode: oData.companyCode,
+                location: oData.location,
+                employmentStatus: oData.employmentStatus,
+                hireDate: oData.hireDate || null,
+                departmentID: oData.department_departmentID,
+                departmentName: (oData.department && oData.department.departmentName) || ""
+            };
 
-        _setSelectedEmployee: function (oEmp) {
-
-            this._oCase.setProperty(
-                "/employee",
-                Object.assign({}, oEmp)
-            );
-
+            this._oCase.setProperty("/employee", oEmp);
             this.byId("employeeInput").setValueState("None");
+            return oEmp;
         },
 
-
-        // onEmployeeSearch: function (oEvent) {
-        //     var sValue = oEvent.getParameter("value");
-        //     var oFilter = new Filter({
-        //         and: false,
-        //         filters: [
-        //             new Filter("employeeID", FilterOperator.Contains, sValue),
-        //             new Filter("displayName", FilterOperator.Contains, sValue),
-        //             new Filter("departmentName", FilterOperator.Contains, sValue),
-        //             new Filter("position", FilterOperator.Contains, sValue)
-        //         ]
-        //     });
-        //     oEvent.getSource().getBinding("items").filter(sValue ? [oFilter] : []);
-        // },
-
+        /* ---------- Value help dialog ---------- */
         onEmployeeSearch: function (oEvent) {
-
             var sValue = (oEvent.getParameter("value") || "").trim();
-
-            var oFilter = new Filter({
-                and: false,
-                filters: [
-                    new Filter(
-                        "employeeID",
-                        FilterOperator.Contains,
-                        sValue
-                    ),
-                    new Filter(
-                        "displayName",
-                        FilterOperator.Contains,
-                        sValue
-                    ),
-                    new Filter(
-                        "departmentName",
-                        FilterOperator.Contains,
-                        sValue
-                    ),
-                    new Filter(
-                        "position",
-                        FilterOperator.Contains,
-                        sValue
-                    )
-                ]
-            });
-
-            oEvent.getSource()
-                .getBinding("items")
-                .filter(sValue ? [oFilter] : []);
+            oEvent.getSource().getBinding("items")
+                .filter(sValue ? [this._buildEmployeeFilter(sValue)] : []);
         },
-
-
-        // onEmployeeConfirm: function (oEvent) {
-        //     var oItem = oEvent.getParameter("selectedItem");
-        //     if (!oItem) { return; }
-        //     var oEmp = oItem.getBindingContext("master").getObject();
-        //     this._oCase.setProperty("/employee", Object.assign({}, oEmp));
-        //     this.byId("employeeInput").setValueState("None");
-        //     oEvent.getSource().getBinding("items").filter([]);
-        // },
 
         onEmployeeConfirm: function (oEvent) {
-
             var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) { return; }
 
-            if (!oItem) {
-                return;
-            }
+            this._setSelectedEmployee(oItem.getBindingContext().getObject());
 
-            var oEmp = oItem
-                .getBindingContext("master")
-                .getObject();
-
-            this._setSelectedEmployee(oEmp);
-
-            // Reset dialog search filters
             var oBinding = oEvent.getSource().getBinding("items");
-
-            if (oBinding) {
-                oBinding.filter([]);
-            }
+            if (oBinding) { oBinding.filter([]); }
         },
-
 
         onEmployeeDialogCancel: function (oEvent) {
-            oEvent.getSource().getBinding("items").filter([]);
+            var oBinding = oEvent.getSource().getBinding("items");
+            if (oBinding) { oBinding.filter([]); }
         },
 
-        /* Remove employee: labels stay, values clear */
-        onClearEmployee: function () {
-            this._oCase.setProperty("/employee", DummyData.getEmptyEmployee());
-        },
+       
 
         onCategoryChange: function (oEvent) {
             var oItem = oEvent.getParameter("selectedItem");
@@ -256,12 +265,17 @@ sap.ui.define([
             return bValid;
         },
 
+        /* Remove employee: keep the labels, clear the values */
+        onClearEmployee: function () {
+            this._oCase.setProperty("/employee", this.getOwnerComponent().getEmptyCase().employee);
+        },
+
         /* ---------- Cancel ---------- */
         onCancel: function () {
             MessageBox.confirm("Discard this case? Entered data will be lost.", {
                 onClose: function (sAction) {
                     if (sAction === MessageBox.Action.OK) {
-                        this._oCase.setData(DummyData.getEmptyCase());
+                        this.getOwnerComponent().resetCase();
                         this.getOwnerComponent().getRouter().navTo("RouteDisciplinaryDisplay", {}, true);
                     }
                 }.bind(this)

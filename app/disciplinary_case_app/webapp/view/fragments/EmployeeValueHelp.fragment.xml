@@ -3,7 +3,13 @@
         title="Select Employee"
         contentWidth="55rem"
         growing="true"
-        items="{master>/employees}"
+        items="{
+            path: '/Employees',
+            parameters: {
+                $select: 'employeeID,firstName,lastName,displayName,email,position,managerID,companyCode,location,employmentStatus,hireDate,department_departmentID',
+                $expand: 'department'
+            }
+        }"
         search=".onEmployeeSearch"
         liveChange=".onEmployeeSearch"
         confirm=".onEmployeeConfirm"
@@ -16,10 +22,10 @@
         </columns>
         <ColumnListItem type="Active">
             <cells>
-                <ObjectIdentifier title="{master>employeeID}"/>
-                <Text text="{master>displayName}"/>
-                <Text text="{master>departmentName}"/>
-                <Text text="{master>position}"/>
+                <ObjectIdentifier title="{employeeID}"/>
+                <Text text="{displayName}"/>
+                <Text text="{department/departmentName}"/>
+                <Text text="{position}"/>
             </cells>
         </ColumnListItem>
     </TableSelectDialog>

@@ -1,16 +1,11 @@
-<!-- <mvc:View controllerName="disciplinary.app.disciplinarycaseapp.controller.DisciplinaryDisplay"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
-    </Page>
-</mvc:View> -->
-
-
 <mvc:View
     controllerName="disciplinary.app.disciplinarycaseapp.controller.DisciplinaryDisplay"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:ui="sap.ui.table"
     xmlns:core="sap.ui.core"
+    xmlns:table="sap.ui.table"
+    xmlns:smartTable="sap.ui.comp.smarttable"
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar">
 
     <Page
@@ -25,7 +20,7 @@
                 <!-- Smart Filter Bar -->
                 <smartFilterBar:SmartFilterBar
                     id="smartFilterBar"
-                    entitySet=""
+                    entitySet="Cases"
                     persistencyKey="DisciplinaryEmployeeFilter"
                     useToolbar="false"
                     showGoOnFB="true"
@@ -33,42 +28,27 @@
                     search="onSearch"
                     enableBasicSearch="true">
 
-                    <smartFilterBar:controlConfiguration>
-
-                        <smartFilterBar:ControlConfiguration
-                            key="displayName"
-                            label="Employee Name"
-                            visibleInAdvancedArea="false"
-                            index="0"/>
-
-                        <smartFilterBar:ControlConfiguration
-                            key="department_departmentID"
-                            label="Department"
-                            visibleInAdvancedArea="false"
-                            index="1"/>
-
-                        <smartFilterBar:ControlConfiguration
-                            key="employmentStatus"
-                            label="Employment Status"
-                            visibleInAdvancedArea="false"
-                            index="2"/>
-
-                    </smartFilterBar:controlConfiguration>
-
                 </smartFilterBar:SmartFilterBar>
 
-                <!-- Employee Responsive Table -->
-                <Panel
-                    expandable="false"
-                    class="sapUiNoContentPadding sapUiSmallMarginTop">
+                <!-- Employee Case Smart Table -->               
+                <smartTable:SmartTable
+                    id="employeeSmartTable"
+                    entitySet="Cases"
+                    tableType="Table"
+                    header="Cases"
+                    showRowCount="true"
+                    enableAutoBinding="true"
+                    useVariantManagement="false"
+                    useTablePersonalisation="true"
+                    useExportToExcel="true"
+                    persistencyKey="EmployeeSmartTable"
+                    demandPopin="true"
+                    smartFilterId="smartFilterBar"
+                    initialise=".onTableInit"
+                    class="sapUiResponsiveContentPadding">
 
-                    <headerToolbar>
+                    <smartTable:customToolbar>
                         <OverflowToolbar>
-
-                            <Title
-                                text="Employees"
-                                level="H3"/>
-
                             <ToolbarSpacer/>
 
                             <Button
@@ -76,104 +56,59 @@
                                 icon="sap-icon://add"
                                 type="Emphasized"
                                 press="onCreateEmployee"/>
-
                         </OverflowToolbar>
-                    </headerToolbar>
+                    </smartTable:customToolbar>
 
-                    <content>
+ <!-- Grid table with two custom columns -->
+    <ui:Table>
+        <ui:columns>
 
-                        <Table
-                            id="employeeTable"
-                            items=""
-                            growing="true"
-                            growingScrollToLoad="true"
-                            growingThreshold="10"
-                            sticky="ColumnHeaders,HeaderToolbar"
-                            mode="None"
-                            width="100%"
-                            noDataText="No employee records found">
+            <!-- Case ID as hyperlink -->
+            <ui:Column
+                id="colCaseID"
+                width="10rem"
+                sortProperty="caseID"
+                filterProperty="caseID">
+                <ui:customData>
+                    <core:CustomData key="p13nData"
+                        value='\{"columnKey":"caseID","leadingProperty":"caseID","sortProperty":"caseID","filterProperty":"caseID"}'/>
+                </ui:customData>
+                <Label text="{i18n>caseID}"/>
+                <ui:template>
+                    <Link text="{caseID}" press=".onCaseIDPress"/>
+                </ui:template>
+            </ui:Column>
 
-                            <columns>
+             <!-- Case Status with colour and icon -->
+            <ui:Column
+                id="colStatus"
+                width="14rem"
+                sortProperty="status_statusCode"
+                filterProperty="status_statusCode">
+                <ui:customData>
+                    <core:CustomData key="p13nData"
+                        value='\{"columnKey":"status_statusCode","leadingProperty":"status_statusCode","sortProperty":"status_statusCode","filterProperty":"status_statusCode"}'/>
+                </ui:customData>
+                <Label text="{i18n>caseStatus}"/>
+                <ui:template>
+                    <ObjectStatus
+                        text="{path: 'status_statusCode', formatter: '.formatter.statusText'}"
+                        state="{path: 'status_statusCode', formatter: '.formatter.statusState'}"
+                        icon="{path: 'status_statusCode', formatter: '.formatter.statusIcon'}"
+                        inverted="true"/>
+                </ui:template>
+            </ui:Column>
 
-                                <Column width="11rem">
-                                    <Text text="Employee ID"/>
-                                </Column>
 
-                                <Column minScreenWidth="Tablet"
-                                    demandPopin="true">
-                                    <Text text="Employee Name"/>
-                                </Column>
+          
 
-                                <Column minScreenWidth="Tablet"
-                                    demandPopin="true">
-                                    <Text text="Email"/>
-                                </Column>
 
-                                <Column minScreenWidth="Desktop"
-                                    demandPopin="true">
-                                    <Text text="Position"/>
-                                </Column>
+           
+        </ui:columns>
+    </ui:Table>
 
-                                <Column minScreenWidth="Desktop"
-                                    demandPopin="true">
-                                    <Text text="Department"/>
-                                </Column>
+                </smartTable:SmartTable>
 
-                                <Column minScreenWidth="Tablet"
-                                    demandPopin="true">
-                                    <Text text="Company Code"/>
-                                </Column>
-
-                                <Column minScreenWidth="Tablet"
-                                    demandPopin="true">
-                                    <Text text="Location"/>
-                                </Column>
-
-                                <Column>
-                                    <Text text="Status"/>
-                                </Column>
-
-                            </columns>
-
-                            <items>
-                                <ColumnListItem
-                                    type="Navigation"
-                                    press="onEmployeePress">
-
-                                    <cells>
-
-                                        <ObjectIdentifier
-                                            title="{employeeID}"/>
-
-                                        <Text text="{displayName}"/>
-
-                                        <Text text="{email}"/>
-
-                                        <Text text="{position}"/>
-
-                                        <Text
-                                            text="{department}"/>
-
-                                        <Text text="{companyCode}"/>
-
-                                        <Text text="{location}"/>
-
-                                        <!-- <ObjectStatus
-                                            text="{v4>employmentStatus}"
-                                            state="{
-                                                path: 'v4>employmentStatus',
-                                                formatter: '.formatStatus'
-                                            }"/> -->
-
-                                    </cells>
-
-                                </ColumnListItem>
-                            </items>
-
-                        </Table>
-
-                    </content>
-                </Panel>
 
             </VBox>
 

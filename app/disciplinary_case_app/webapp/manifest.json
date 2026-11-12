@@ -23,6 +23,14 @@
           "annotations": [],
           "odataVersion": "4.0"
         }
+      },
+      "EmployeeV2Service": {
+        "uri": "/odata/v2/employee/",
+        "type": "OData",
+        "settings": {
+            "annotations": [],
+            "odataVersion": "2.0"
+        }
       }
     },
     "crossNavigation": {
@@ -83,6 +91,15 @@
           "autoExpandSelect": true,
           "earlyRequests": true
         }
+      },
+      "EmployeeV2Model": {
+        "type": "sap.ui.model.odata.v2.ODataModel",
+        "dataSource": "EmployeeV2Service",
+        "preload": false,
+        "settings": {
+            "defaultBindingMode": "TwoWay",
+            "useBatch": true
+        }
       }
     },
     "resources": {
@@ -121,7 +138,13 @@
                   "TargetCreateEmployee"
               ]
           },
-          { "name": "RoutePreviewCase",    "pattern": "preview", "target": ["TargetPreviewCase"] }
+          { "name": "RoutePreviewCase",    "pattern": "preview", "target": ["TargetPreviewCase"] },
+          {
+            "name": "RouteCaseDetail",
+            "pattern": "case/{caseID}",
+            "target": ["TargetCaseDetail"]
+          }
+
       ],
       "targets": {
           "TargetDisciplinaryDisplay": {
@@ -132,7 +155,11 @@
               "id": "CreateEmployee",
               "name": "CreateEmployee"
           },
-           "TargetPreviewCase":    { "id": "PreviewCase",    "name": "PreviewCase" }
+           "TargetPreviewCase":    { "id": "PreviewCase",    "name": "PreviewCase" },
+           "TargetCaseDetail": {
+              "id": "CaseDetail",
+              "name": "CaseDetail"
+            }
       }
 
     },
