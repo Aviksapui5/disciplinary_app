@@ -79,6 +79,10 @@
                 <Panel headerText="Case Description" class="sapUiSmallMarginBottom">
                     <Text text="{case>/caseDescription}"/>
                 </Panel>
+
+                <Panel headerText="Supporting Documents" class="sapUiSmallMarginBottom">
+                    <Text text=""/>
+                </Panel>
             </VBox>
         </content>
 

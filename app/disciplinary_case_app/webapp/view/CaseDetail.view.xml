@@ -8,7 +8,7 @@
 
     <Page
         id="caseDetailPage"
-        title="{i18n>caseDetailTitle}"
+        title="Case Details"
         showNavButton="true"
         navButtonPress=".onNavBack"
         busyIndicatorDelay="0">
@@ -72,6 +72,9 @@
 
                     <Label text="{i18n>caseDescription}"/>
                     <Text text="{caseDescription}"/>
+
+                    <Label text="Supporting Documents"/>
+                    <Text text=""/>
                 </form:SimpleForm>
             </Panel>
 

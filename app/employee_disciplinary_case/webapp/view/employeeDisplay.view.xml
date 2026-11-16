@@ -1,6 +1,208 @@
-<mvc:View controllerName="com.emp.discip.employeedisciplinarycase.controller.employeeDisplay"
+<mvc:View
+    controllerName="com.emp.discip.employeedisciplinarycase.controller.employeeDisplay"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
-    </Page>
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:upload="sap.m.upload"
+    xmlns:u="sap.ui.unified"
+    xmlns:l="sap.ui.layout"
+    displayBlock="true"
+    height="100%">
+
+    <SplitApp id="splitApp" initialMaster="masterPage" initialDetail="detailPage" masterButtonText=" ">
+
+        <!-- ================= MASTER : CASES LIST ================= -->
+        <masterPages>
+           <Page id="masterPage" title="Disciplinary Cases">
+                <List
+                    id="caseList"
+                    items="{cases>/cases}"
+                    mode="SingleSelectMaster"
+                    selectionChange="onCaseSelect"
+                    updateFinished="onListUpdateFinished"
+                    noDataText="No cases found">
+
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="Cases"/>
+                        </Toolbar>
+                    </headerToolbar>
+
+                    <infoToolbar>
+                        <Toolbar>
+                            <SearchField
+                                placeholder="Case ID or category"
+                                liveChange="onSearch"
+                                search="onSearch"
+                                width="100%"/>
+                        </Toolbar>
+                    </infoToolbar>
+
+                    <ObjectListItem
+                        title="{cases>caseId}"
+                        type="Active">
+                        <firstStatus>
+                            <ObjectStatus
+                                text="{cases>status}"
+                                state="{= ${cases>status} === 'Responded' ? 'Success' : 'Warning'}"/>
+                        </firstStatus>
+                        <attributes>
+                            <ObjectAttribute text="{cases>category}"/>
+                            <ObjectAttribute text="Reported: {cases>reportedDate}"/>
+                        </attributes>
+                    </ObjectListItem>
+                </List>
+            </Page>
+        </masterPages>
+
+        <!-- ================= DETAIL : CASE DETAILS + REPLY ================= -->
+        <detailPages>
+            <Page
+                id="detailPage"
+                title="Case details"
+                showNavButton="{device>/system/phone}"
+                navButtonPress="onNavBack"
+                showFooter="{= ${cases>status} !== 'Responded'}">
+
+                <content>
+                    <!-- Deadline banner -->
+                    <MessageStrip
+                        class="sapUiSmallMargin"
+                        type="Warning"
+                        showIcon="true"
+                        visible="{= ${cases>status} !== 'Responded'}"
+                        text="Response deadline: {cases>deadline} - please reply before this date"/>
+
+                    <!-- Case details (read only) -->
+                    <Panel class="sapUiResponsiveMargin" width="auto">
+                        <headerToolbar>
+                            <Toolbar>
+                                <Title text="Case details · {cases>caseId}"/>
+                                <ToolbarSpacer/>
+                                <ObjectStatus
+                                    text="{cases>status}"
+                                    state="{= ${cases>status} === 'Responded' ? 'Success' : 'Warning'}"/>
+                            </Toolbar>
+                        </headerToolbar>
+                        <content>
+                            <form:SimpleForm
+                                editable="false"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="4" labelSpanL="4" labelSpanM="12" labelSpanS="12"
+                                adjustLabelSpan="false"
+                                emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0"
+                                columnsXL="2" columnsL="2" columnsM="1"
+                                singleContainerFullSize="false">
+                                <form:content>
+                                    <core:Title text="Allegation"/>
+                                    <Label text="Allegation category"/>
+                                    <Text text="{cases>category}"/>
+                                    <Label text="Incident location"/>
+                                    <Text text="{cases>location}"/>
+
+                                    <core:Title text="Dates"/>
+                                    <Label text="Incident date"/>
+                                    <Text text="{cases>incidentDate}"/>
+                                    <Label text="Reported date"/>
+                                    <Text text="{cases>reportedDate}"/>
+                                    <Label text="Response deadline"/>
+                                    <Text text="{cases>deadline}"/>
+                                </form:content>
+                            </form:SimpleForm>
+
+                            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                                <Label text="Case description"/>
+                                <Text text="{cases>description}"/>
+                            </VBox>
+                        </content>
+                    </Panel>
+
+                    <!-- Reply -->
+                    <Panel class="sapUiResponsiveMargin" width="auto">
+                        <headerToolbar>
+                            <Toolbar>
+                                <Title text="Your response"/>
+                            </Toolbar>
+                        </headerToolbar>
+                        <content>
+                            <form:SimpleForm
+                                editable="true"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="12" labelSpanL="12" labelSpanM="12" labelSpanS="12"
+                                adjustLabelSpan="false"
+                                emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0"
+                                columnsXL="1" columnsL="1" columnsM="1"
+                                singleContainerFullSize="false">
+                                <form:content>
+
+                                    <Label text="Response date" required="true" labelFor="responseDate"/>
+                                    <DatePicker
+                                        id="responseDate"
+                                        value="{cases>response/date}"
+                                        valueFormat="dd-MM-yy"
+                                        displayFormat="dd-MM-yy"
+                                        placeholder="Select response date"
+                                        enabled="{= ${cases>status} !== 'Responded'}"
+                                        change="onFieldChange">
+                                        <layoutData>
+                                            <l:GridData span="XL3 L4 M6 S12"/>
+                                        </layoutData>
+                                    </DatePicker>
+
+                                    <Label text="Response description" required="true" labelFor="responseText"/>
+                                    <TextArea
+                                        id="responseText"
+                                        value="{cases>response/text}"
+                                        rows="6"
+                                        maxLength="5000"
+                                        showExceededText="true"
+                                        valueLiveUpdate="true"
+                                        placeholder="Write your response to this allegation"
+                                        enabled="{= ${cases>status} !== 'Responded'}"
+                                        liveChange="onFieldChange">
+                                        <layoutData>
+                                            <l:GridData span="XL8 L8 M12 S12"/>
+                                        </layoutData>
+                                    </TextArea>
+
+                                    <Label text="Supporting documents" labelFor="fileUploader"/>
+                                    <u:FileUploader
+                                        id="fileUploader"
+                                        name="myFileUpload"
+                                        placeholder="Choose documents"
+                                        buttonText="Browse"
+                                        tooltip="Select documents to attach"
+                                        enabled="{= ${cases>status} !== 'Responded'}"
+                                        multiple="true"
+                                        uploadOnChange="false"
+                                        fileType="pdf,doc,docx,xls,xlsx,jpg,jpeg,png,txt"
+                                        maximumFileSize="10"
+                                        sameFilenameAllowed="false"
+                                        change=".onFileChange"
+                                        typeMissmatch=".onTypeMissmatch"
+                                        fileSizeExceed=".onFileSizeExceed">
+                                        <u:layoutData>
+                                            <l:GridData span="XL6 L6 M12 S12"/>
+                                        </u:layoutData>
+                                    </u:FileUploader>
+
+                                </form:content>
+                            </form:SimpleForm>
+                        </content>
+                    </Panel>
+                </content>
+
+                <footer>
+                    <!-- <OverflowToolbar visible="{= ${cases>status} !== 'Responded'}"> -->
+                    <OverflowToolbar>
+                        <ToolbarSpacer/>
+                        <!-- <Button text="Save draft" press="onSaveDraft"/> -->
+                        <Button text="Submit response" type="Emphasized" press="onSubmit"/>
+                    </OverflowToolbar>
+                </footer>
+            </Page>
+        </detailPages>
+    </SplitApp>
 </mvc:View>
+

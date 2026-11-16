@@ -5,6 +5,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
     xmlns:layout="sap.ui.layout">
 
     <Page
@@ -557,6 +558,23 @@
                                             showExceededText="true"
                                             value="{case>/caseDescription}"
                                             placeholder="Describe the incident in detail"/>
+
+                                            <Label text="Supporting document:" labelFor="uploadSet"/>                                    
+                                                <u:FileUploader
+                                                    id="fileUploader"
+                                                    name="myFileUpload"
+                                                    width="74%"
+                                                    placeholder="Choose documents"
+                                                    buttonText="Browse"
+                                                    tooltip="Select documents to attach"
+                                                    multiple="true"
+                                                    uploadOnChange="false"
+                                                    fileType="pdf,doc,docx,xls,xlsx,jpg,jpeg,png,txt"
+                                                    maximumFileSize="10"
+                                                    sameFilenameAllowed="true"
+                                                    change=".onFileChange"
+                                                    typeMissmatch=".onTypeMissmatch"
+                                                    fileSizeExceed=".onFileSizeExceed"/>
 
                                     </VBox>
 

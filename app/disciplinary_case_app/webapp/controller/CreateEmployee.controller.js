@@ -49,62 +49,133 @@ sap.ui.define([
             });
         },
         /* ---------- Filter builder (shared) ---------- */
+        // _buildEmployeeFilter: function (sValue) {
+
+        //     var aTokens = sValue.split(/\s+/).filter(Boolean);
+
+        //     // Employee ID: exact or partial match
+        //     var aFilters = [
+        //         new Filter(
+        //             "employeeID",
+        //             FilterOperator.EQ,
+        //             sValue
+        //         ),
+        //         new Filter(
+        //             "employeeID",
+        //             FilterOperator.Contains,
+        //             sValue
+        //         )
+        //     ];
+
+        //     // Name search: every word must match at least one name field
+        //     var aNameFilters = aTokens.map(function (sToken) {
+
+        //         return new Filter({
+        //             filters: [
+        //                 new Filter(
+        //                     "displayName",
+        //                     FilterOperator.Contains,
+        //                     sToken
+        //                 ),
+        //                 new Filter(
+        //                     "firstName",
+        //                     FilterOperator.Contains,
+        //                     sToken
+        //                 ),
+        //                 new Filter(
+        //                     "lastName",
+        //                     FilterOperator.Contains,
+        //                     sToken
+        //                 )
+        //             ],
+        //             and: false
+        //         });
+
+        //     });
+
+        //     if (aNameFilters.length) {
+
+        //         aFilters.push(new Filter({
+        //             filters: aNameFilters,
+        //             and: true
+        //         }));
+        //     }
+
+        //     return new Filter({
+        //         filters: aFilters,
+        //         and: false
+        //     });
+        // },
+
+
+        /* ---------- Employee Filter Builder (Shared) ---------- */
         _buildEmployeeFilter: function (sValue) {
 
-            var aTokens = sValue.split(/\s+/).filter(Boolean);
+            if (!sValue || !sValue.trim()) {
+                return null;
+            }
 
-            // Employee ID: exact or partial match
+            // Normalize search input
+            var aTokens = sValue.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+            // Employee ID search
             var aFilters = [
-                new Filter(
-                    "employeeID",
-                    FilterOperator.EQ,
-                    sValue
-                ),
-                new Filter(
-                    "employeeID",
-                    FilterOperator.Contains,
-                    sValue
-                )
+                new Filter({
+                    path: "employeeID",
+                    operator: FilterOperator.Contains,
+                    value1: sValue.trim(),
+                    caseSensitive: false
+                })
             ];
 
-            // Name search: every word must match at least one name field
+            // Name search: every entered word must match
+            // at least one of displayName, firstName, or lastName
             var aNameFilters = aTokens.map(function (sToken) {
 
                 return new Filter({
                     filters: [
-                        new Filter(
-                            "displayName",
-                            FilterOperator.Contains,
-                            sToken
-                        ),
-                        new Filter(
-                            "firstName",
-                            FilterOperator.Contains,
-                            sToken
-                        ),
-                        new Filter(
-                            "lastName",
-                            FilterOperator.Contains,
-                            sToken
-                        )
+                        new Filter({
+                            path: "displayName",
+                            operator: FilterOperator.Contains,
+                            value1: sToken,
+                            caseSensitive: false
+                        }),
+
+                        new Filter({
+                            path: "firstName",
+                            operator: FilterOperator.Contains,
+                            value1: sToken,
+                            caseSensitive: false
+                        }),
+
+                        new Filter({
+                            path: "lastName",
+                            operator: FilterOperator.Contains,
+                            value1: sToken,
+                            caseSensitive: false
+                        })
                     ],
                     and: false
                 });
 
             });
 
-            if (aNameFilters.length) {
+            // All name tokens must match
+            if (aNameFilters.length > 0) {
 
                 aFilters.push(new Filter({
                     filters: aNameFilters,
                     and: true
                 }));
+
             }
 
+            // Employee ID OR Employee Name
             return new Filter({
                 filters: aFilters,
                 and: false
             });
+
         },
 
         /* ---------- Value help ---------- */
@@ -206,11 +277,39 @@ sap.ui.define([
         },
 
         /* ---------- Value help dialog ---------- */
+        // onEmployeeSearch: function (oEvent) {
+        //     var sValue = (oEvent.getParameter("value") || "").trim();
+        //     oEvent.getSource().getBinding("items")
+        //         .filter(sValue ? [this._buildEmployeeFilter(sValue)] : []);
+        // },
+
+        /* ---------- Employee Value Help Search ---------- */
         onEmployeeSearch: function (oEvent) {
-            var sValue = (oEvent.getParameter("value") || "").trim();
-            oEvent.getSource().getBinding("items")
-                .filter(sValue ? [this._buildEmployeeFilter(sValue)] : []);
+
+            var sValue = (
+                oEvent.getParameter("value") ||
+                oEvent.getParameter("query") ||
+                ""
+            ).trim();
+
+            var oDialog = oEvent.getSource();
+            var oBinding = oDialog.getBinding("items");
+
+            if (!oBinding) {
+                return;
+            }
+
+            if (!sValue) {
+                oBinding.filter([]);
+                return;
+            }
+
+            var oFilter = this._buildEmployeeFilter(sValue);
+
+            oBinding.filter(oFilter ? [oFilter] : []);
+
         },
+
 
         onEmployeeConfirm: function (oEvent) {
             var oItem = oEvent.getParameter("selectedItem");
@@ -233,6 +332,18 @@ sap.ui.define([
             var oItem = oEvent.getParameter("selectedItem");
             this._oCase.setProperty("/categoryName", oItem ? oItem.getText() : "");
             this.byId("categorySelect").setValueState("None");
+        },
+        onFileChange(oEvent) {
+            // keep the selected files so they can be sent to the service later
+            this._aFiles = Array.from(oEvent.getParameter("files") || []);
+        },
+
+        onTypeMissmatch(oEvent) {
+            MessageToast.show("File type not allowed: " + oEvent.getParameter("fileType"));
+        },
+
+        onFileSizeExceed() {
+            MessageToast.show("File size must be 10 MB or less");
         },
 
         /* ---------- Preview ---------- */
