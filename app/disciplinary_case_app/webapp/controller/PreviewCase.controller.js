@@ -89,13 +89,20 @@ sap.ui.define([
                 if (oEvent.getParameter("success")) {
                     var oCreated = oContext.getObject() || {};
                     var sCreatedRef = oCreated.caseReference || sRef;
+                    var sCreatedCaseID = oCreated.caseID || "";
 
                     MessageBox.success(
-                        "Case submitted successfully." + (sCreatedRef ? "\nReference: " + sCreatedRef : ""),
+                        "Case submitted successfully." +
+                        "\nCase ID: " + sCreatedCaseID +
+                        "\nReference: " + sCreatedRef,
                         {
                             onClose: function () {
                                 this.getOwnerComponent().resetCase();
-                                this._oRouter.navTo("RouteDisciplinaryDisplay", {}, true);
+                                this._oRouter.navTo(
+                                    "RouteDisciplinaryDisplay",
+                                    {},
+                                    true
+                                );
                             }.bind(this)
                         }
                     );
