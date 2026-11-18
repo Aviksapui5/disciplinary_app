@@ -46,6 +46,19 @@ sap.ui.define(["sap/ui/core/library"], function (coreLibrary) {
                 .split("_")
                 .map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); })
                 .join(" ");
+        },
+        fileSize: function (iBytes) {
+            if (iBytes === null || iBytes === undefined) { return ""; }
+            if (iBytes < 1024) { return iBytes + " B"; }
+            if (iBytes < 1024 * 1024) { return (iBytes / 1024).toFixed(1) + " KB"; }
+            return (iBytes / (1024 * 1024)).toFixed(1) + " MB";
+        },
+
+        fileType: function (sMediaType, sFileName) {
+            if (sFileName && sFileName.indexOf(".") > -1) {
+                return sFileName.split(".").pop().toUpperCase();
+            }
+            return sMediaType ? sMediaType.split("/").pop().toUpperCase() : "";
         }
     };
 

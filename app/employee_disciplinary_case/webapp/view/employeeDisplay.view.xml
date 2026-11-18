@@ -216,29 +216,85 @@
                                             <l:GridData span="XL8 L8 M12 S12"/>
                                         </layoutData>
                                     </TextArea>
-
-                                    <Label text="Supporting documents" labelFor="fileUploader"/>
-                                    <u:FileUploader
-                                        id="fileUploader"
-                                        name="myFileUpload"
-                                        placeholder="Choose documents"
-                                        buttonText="Browse"
-                                        tooltip="Select documents to attach"
-                                        multiple="true"
-                                        uploadOnChange="false"
-                                        fileType="pdf,doc,docx,xls,xlsx,jpg,jpeg,png,txt"
-                                        maximumFileSize="10"
-                                        sameFilenameAllowed="false"
-                                        change=".onFileChange"
-                                        typeMissmatch=".onTypeMissmatch"
-                                        fileSizeExceed=".onFileSizeExceed">
-                                        <u:layoutData>
-                                            <l:GridData span="XL6 L6 M12 S12"/>
-                                        </u:layoutData>
-                                    </u:FileUploader>
-
                                 </form:content>
                             </form:SimpleForm>
+                            <!-- SUPPORTING DOCUMENTS -->
+                            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                                <Table
+                                    id="documentsTable"
+                                    items="{ui>/documents}"
+                                    noDataText="No documents uploaded yet. Use Upload to add supporting documents.">
+
+                                    <headerToolbar>
+                                        <OverflowToolbar>
+                                            <Title text="{= 'Documents (' + ${ui>/documents}.length + ')' }" level="H5"/>
+                                            <ToolbarSpacer/>
+                                            <SearchField
+                                                width="14rem"
+                                                placeholder="Search"
+                                                liveChange=".onDocumentSearch"
+                                                search=".onDocumentSearch"/>
+                                            <ToolbarSeparator/>
+                                            <u:FileUploader
+                                                id="fileUploader"
+                                                name="myFileUpload"
+                                                buttonOnly="true"
+                                                buttonText="Upload"
+                                                icon="sap-icon://upload"
+                                                style="Transparent"
+                                                multiple="true"
+                                                uploadOnChange="false"
+                                                fileType="pdf,doc,docx,xls,xlsx,jpg,jpeg,png,txt"
+                                                maximumFileSize="10"
+                                                sameFilenameAllowed="true"
+                                                tooltip="Select documents to attach"
+                                                change=".onFileChange"
+                                                typeMissmatch=".onTypeMissmatch"
+                                                fileSizeExceed=".onFileSizeExceed"/>
+                                        </OverflowToolbar>
+                                    </headerToolbar>
+
+                                    <columns>
+                                        <Column><Text text="File Name"/></Column>
+                                        <Column width="6rem" minScreenWidth="Tablet" demandPopin="true"><Text text="Type"/></Column>
+                                        <Column width="7rem"><Text text="Size"/></Column>
+                                        <Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="Uploaded On"/></Column>
+                                        <Column width="3rem" hAlign="End"/>
+                                    </columns>
+
+                                    <items>
+                                        <ColumnListItem vAlign="Middle">
+                                            <cells>
+                                                <HBox alignItems="Center">
+                                                    <Avatar
+                                                        src="{ui>thumbnail}"
+                                                        displaySize="M"
+                                                        displayShape="Square"
+                                                        backgroundColor="Placeholder"
+                                                        imageFitType="Cover"
+                                                        tooltip="Preview"
+                                                        press=".onDocumentPreview"
+                                                        class="sapUiSmallMarginEnd"/>
+                                                    <Link text="{ui>fileName}" wrapping="true" press=".onDocumentPreview"/>
+                                                </HBox>
+                                                <Text text="{ui>extension}"/>
+                                                <Text text="{ui>sizeText}"/>
+                                                <Text text="{path:'ui>uploadedOn', type:'sap.ui.model.type.DateTime',
+                                                            formatOptions:{style:'medium'}}"/>
+                                                <Button
+                                                    icon="sap-icon://decline"
+                                                    type="Transparent"
+                                                    tooltip="Remove file"
+                                                    press=".onDocumentRemove"/>
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+
+                                <Text
+                                    text="Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT. Max 10 MB per file, up to 10 files."
+                                    class="sapUiTinyMarginTop"/>
+                            </VBox>
                         </content>
                     </Panel>
                 </content>

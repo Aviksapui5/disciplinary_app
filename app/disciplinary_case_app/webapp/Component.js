@@ -55,7 +55,8 @@ sap.ui.define([
                     incidentDate: null,
                     reportedDate: null,
                     incidentLocation: "",
-                    caseDescription: ""
+                    caseDescription: "",
+                    documents: []
                 };
             },
 

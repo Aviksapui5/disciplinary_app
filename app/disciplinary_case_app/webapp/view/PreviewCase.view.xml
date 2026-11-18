@@ -81,7 +81,47 @@
                 </Panel>
 
                 <Panel headerText="Supporting Documents" class="sapUiSmallMarginBottom">
-                    <Text text=""/>
+                    <Table
+                        id="previewDocumentsTable"
+                        items="{case>/documents}"
+                        noDataText="No supporting documents attached">
+
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title text="{= 'Documents (' + ${case>/documents}.length + ')' }" level="H5"/>
+                                <ToolbarSpacer/>
+                                <SearchField width="14rem" placeholder="Search"
+                                    liveChange=".onDocumentSearch" search=".onDocumentSearch"/>
+                            </OverflowToolbar>
+                        </headerToolbar>
+
+                        <columns>
+                            <Column><Text text="File Name"/></Column>
+                            <Column width="6rem" minScreenWidth="Tablet" demandPopin="true"><Text text="Type"/></Column>
+                            <Column width="7rem"><Text text="Size"/></Column>
+                            <Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="Uploaded On"/></Column>
+                            <Column width="4rem" hAlign="End"/>
+                        </columns>
+
+                        <items>
+                            <ColumnListItem vAlign="Middle">
+                                <cells>
+                                    <HBox alignItems="Center">
+                                        <Avatar src="{case>thumbnail}" displaySize="M" displayShape="Square"
+                                                backgroundColor="Placeholder" imageFitType="Cover"
+                                                press=".onDocumentPreview" class="sapUiSmallMarginEnd"/>
+                                        <Link text="{case>fileName}" wrapping="true" press=".onDocumentPreview"/>
+                                    </HBox>
+                                    <Text text="{case>extension}"/>
+                                    <Text text="{case>sizeText}"/>
+                                    <Text text="{path:'case>uploadedOn', type:'sap.ui.model.type.DateTime',
+                                                formatOptions:{style:'medium'}}"/>
+                                    <Button icon="sap-icon://download" type="Transparent" tooltip="Download"
+                                            press=".onDocumentDownload"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
                 </Panel>
             </VBox>
         </content>

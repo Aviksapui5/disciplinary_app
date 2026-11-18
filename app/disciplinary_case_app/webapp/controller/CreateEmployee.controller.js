@@ -7,9 +7,10 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/SuggestionItem",
     "disciplinary/app/disciplinarycaseapp/model/DummyData",
-    "disciplinary/app/disciplinarycaseapp/model/formatter"
+    "disciplinary/app/disciplinarycaseapp/model/formatter",
+    "disciplinary/app/disciplinarycaseapp/model/DocumentHelper"
 ], function (Controller, Fragment, Filter, FilterOperator, MessageBox, MessageToast,
-    SuggestionItem, DummyData, formatter) {
+    SuggestionItem, DummyData, formatter,DocumentHelper) {
     "use strict";
 
     // all fields we need when an employee is selected
@@ -47,66 +48,12 @@ sap.ui.define([
 
                 templateShareable: false
             });
+
+            if (!this._oCase.getProperty("/documents")) {
+                this._oCase.setProperty("/documents", []);
+            }
         },
-        /* ---------- Filter builder (shared) ---------- */
-        // _buildEmployeeFilter: function (sValue) {
-
-        //     var aTokens = sValue.split(/\s+/).filter(Boolean);
-
-        //     // Employee ID: exact or partial match
-        //     var aFilters = [
-        //         new Filter(
-        //             "employeeID",
-        //             FilterOperator.EQ,
-        //             sValue
-        //         ),
-        //         new Filter(
-        //             "employeeID",
-        //             FilterOperator.Contains,
-        //             sValue
-        //         )
-        //     ];
-
-        //     // Name search: every word must match at least one name field
-        //     var aNameFilters = aTokens.map(function (sToken) {
-
-        //         return new Filter({
-        //             filters: [
-        //                 new Filter(
-        //                     "displayName",
-        //                     FilterOperator.Contains,
-        //                     sToken
-        //                 ),
-        //                 new Filter(
-        //                     "firstName",
-        //                     FilterOperator.Contains,
-        //                     sToken
-        //                 ),
-        //                 new Filter(
-        //                     "lastName",
-        //                     FilterOperator.Contains,
-        //                     sToken
-        //                 )
-        //             ],
-        //             and: false
-        //         });
-
-        //     });
-
-        //     if (aNameFilters.length) {
-
-        //         aFilters.push(new Filter({
-        //             filters: aNameFilters,
-        //             and: true
-        //         }));
-        //     }
-
-        //     return new Filter({
-        //         filters: aFilters,
-        //         and: false
-        //     });
-        // },
-
+        
 
         /* ---------- Employee Filter Builder (Shared) ---------- */
         _buildEmployeeFilter: function (sValue) {
@@ -276,13 +223,6 @@ sap.ui.define([
             return oEmp;
         },
 
-        /* ---------- Value help dialog ---------- */
-        // onEmployeeSearch: function (oEvent) {
-        //     var sValue = (oEvent.getParameter("value") || "").trim();
-        //     oEvent.getSource().getBinding("items")
-        //         .filter(sValue ? [this._buildEmployeeFilter(sValue)] : []);
-        // },
-
         /* ---------- Employee Value Help Search ---------- */
         onEmployeeSearch: function (oEvent) {
 
@@ -333,9 +273,13 @@ sap.ui.define([
             this._oCase.setProperty("/categoryName", oItem ? oItem.getText() : "");
             this.byId("categorySelect").setValueState("None");
         },
-        onFileChange(oEvent) {
-            // keep the selected files so they can be sent to the service later
-            this._aFiles = Array.from(oEvent.getParameter("files") || []);
+
+
+        onFileChange: function (oEvent) {
+            var oUploader = oEvent.getSource();
+            var aFiles = Array.from(oEvent.getParameter("files") || []); // copy before clear()
+            DocumentHelper.addFiles(this._oCase, aFiles);
+            oUploader.clear();   // lets the user pick the same file again later
         },
 
         onTypeMissmatch(oEvent) {
@@ -344,6 +288,19 @@ sap.ui.define([
 
         onFileSizeExceed() {
             MessageToast.show("File size must be 10 MB or less");
+        },
+        onDocumentSearch: function (oEvent) {
+            var sQuery = oEvent.getParameter("newValue");
+            if (sQuery === undefined) { sQuery = oEvent.getParameter("query"); }
+            DocumentHelper.filterByName(this.byId("documentsTable"), sQuery);
+        },
+
+        onDocumentPreview: function (oEvent) {
+            DocumentHelper.preview(oEvent.getSource().getBindingContext("case").getObject());
+        },
+
+        onDocumentRemove: function (oEvent) {
+            DocumentHelper.removeFile(this._oCase, oEvent.getSource().getBindingContext("case").getObject());
         },
 
         /* ---------- Preview ---------- */
@@ -386,6 +343,7 @@ sap.ui.define([
             MessageBox.confirm("Discard this case? Entered data will be lost.", {
                 onClose: function (sAction) {
                     if (sAction === MessageBox.Action.OK) {
+                        DocumentHelper.releaseAll(this._oCase);          // <-- added
                         this.getOwnerComponent().resetCase();
                         this.getOwnerComponent().getRouter().navTo("RouteDisciplinaryDisplay", {}, true);
                     }

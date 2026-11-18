@@ -3,6 +3,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
+    xmlns:uxap="sap.uxap"
     xmlns:form="sap.ui.layout.form"
     core:require="{ formatter: 'disciplinary/app/disciplinarycaseapp/model/formatter' }">
 
@@ -11,114 +12,295 @@
         title="Case Details"
         showNavButton="true"
         navButtonPress=".onNavBack"
+        enableScrolling="false"
         busyIndicatorDelay="0">
 
-        <!-- Header summary -->
-        <ObjectHeader
-            title="{caseID}"
-            number="{caseReference}"
-            responsive="true"
-            backgroundDesign="Solid">
-            <statuses>
-                <ObjectStatus
-                    text="{path: 'status_statusCode', formatter: 'formatter.statusText'}"
-                    state="{path: 'status_statusCode', formatter: 'formatter.statusState'}"
-                    icon="{path: 'status_statusCode', formatter: 'formatter.statusIcon'}"
-                    inverted="true"/>
-            </statuses>
-            <attributes>
-                <ObjectAttribute title="{i18n>incidentDate}" text="{incidentDate}"/>
-                <ObjectAttribute title="{i18n>caseCategory}" text="{category_categoryID}"/>
-            </attributes>
-        </ObjectHeader>
-
         <content>
-            <!-- General information -->
-            <Panel headerText="General Info" class="sapUiResponsiveMargin" width="auto">
-                <form:SimpleForm editable="false" layout="ColumnLayout"
-                    columnsM="2" columnsL="2" columnsXL="3">
-                    <Label text="{i18n>caseID}"/>
-                    <Text text="{caseID}"/>
+            <uxap:ObjectPageLayout
+                id="caseObjectPage"
+                upperCaseAnchorBar="false"
+                showTitleInHeaderContent="false"
+                headerContentPinnable="true"
+                enableLazyLoading="false"
+                useIconTabBar="false">
 
-                    <Label text="{i18n>caseReference}"/>
-                    <Text text="{caseReference}"/>
+                <!-- ===================== TITLE ===================== -->
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:heading>
+                            <Title text="{caseID}"/>
+                        </uxap:heading>
 
-                    <Label text="{i18n>employeeID}"/>
-                    <Text text="{employee_employeeID}"/>
+                        <uxap:expandedContent>
+                            <Text text="{caseReference}"/>
+                        </uxap:expandedContent>
 
-                    <Label text="{i18n>department}"/>
-                    <Text text="{department_departmentID}"/>
+                        <uxap:snappedContent>
+                            <Text text="{caseReference}"/>
+                        </uxap:snappedContent>
 
-                    <Label text="{i18n>caseCategory}"/>
-                    <Text text="{category_categoryID}"/>
+                        <uxap:actions>
+                            <ObjectStatus
+                                text="{path: 'status_statusCode', formatter: 'formatter.statusText'}"
+                                state="{path: 'status_statusCode', formatter: 'formatter.statusState'}"
+                                icon="{path: 'status_statusCode', formatter: 'formatter.statusIcon'}"
+                                inverted="true"/>
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
 
-                    <Label text="{i18n>caseStatus}"/>
-                    <ObjectStatus
-                        text="{path: 'status_statusCode', formatter: 'formatter.statusText'}"
-                        state="{path: 'status_statusCode', formatter: 'formatter.statusState'}"
-                        icon="{path: 'status_statusCode', formatter: 'formatter.statusIcon'}"/>
-                </form:SimpleForm>
-            </Panel>
+                <!-- ===================== HEADER CONTENT ===================== -->
+                <!-- ObjectAttribute renders "Label: value" on one line -->
+                <uxap:headerContent>
+                    <VBox>
+                        <ObjectAttribute
+                            title="{i18n>incidentDate}"
+                            text="{path: 'incidentDate', type: 'sap.ui.model.odata.type.Date'}"/>
+                        <ObjectAttribute
+                            title="{i18n>caseCategory}"
+                            text="{category_categoryID}"/>
+                    </VBox>
+                </uxap:headerContent>
 
-            <!-- Incident details -->
-            <Panel headerText="Incident Details" class="sapUiResponsiveMargin" width="auto">
-                <form:SimpleForm editable="false" layout="ColumnLayout"
-                    columnsM="2" columnsL="2" columnsXL="3">
-                    <Label text="{i18n>incidentDate}"/>
-                    <Text text="{incidentDate}"/>
+                <!-- ===================== SECTIONS ===================== -->
+                <uxap:sections>
 
-                    <Label text="{i18n>incidentLocation}"/>
-                    <Text text="{incidentLocation}"/>
+                    <!-- 1. General Information -->
+                    <uxap:ObjectPageSection id="sectionGeneral" title="Case Overview" titleUppercase="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subGeneral" title="Case Overview">
+                                <uxap:blocks>
+                                    <form:SimpleForm editable="false" layout="ColumnLayout"
+                                        columnsM="2" columnsL="2" columnsXL="3">
+                                        <Label text="{i18n>caseID}"/>
+                                        <Text text="{caseID}"/>
 
-                    <Label text="{i18n>caseDescription}"/>
-                    <Text text="{caseDescription}"/>
+                                        <Label text="{i18n>caseReference}"/>
+                                        <Text text="{caseReference}"/>
 
-                    <Label text="Supporting Documents"/>
-                    <Text text=""/>
-                </form:SimpleForm>
-            </Panel>
+                                        <Label text="{i18n>employeeID}"/>
+                                        <Text text="{employee_employeeID}"/>
 
-            <!-- People and dates -->
-            <Panel headerText="People and Dates" class="sapUiResponsiveMargin" width="auto">
-                <form:SimpleForm editable="false" layout="ColumnLayout"
-                    columnsM="2" columnsL="2" columnsXL="3">
-                    <Label text="{i18n>lineManager}"/>
-                    <Text text="{lineManagerID}"/>
+                                        <Label text="{i18n>department}"/>
+                                        <Text text="{department_departmentID}"/>
 
-                    <Label text="{i18n>hrbp}"/>
-                    <Text text="{hrbpID}"/>
+                                        <Label text="{i18n>caseCategory}"/>
+                                        <Text text="{category_categoryID}"/>
 
-                    <Label text="{i18n>erCaseManager}"/>
-                    <Text text="{erCaseManagerID}"/>
+                                        <Label text="{i18n>caseStatus}"/>
+                                        <ObjectStatus
+                                            text="{path: 'status_statusCode', formatter: 'formatter.statusText'}"
+                                            state="{path: 'status_statusCode', formatter: 'formatter.statusState'}"
+                                            icon="{path: 'status_statusCode', formatter: 'formatter.statusIcon'}"/>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
 
-                    <Label text="{i18n>allegationIssuedAt}"/>
-                    <Text text="{allegationIssuedAt}"/>
+                    <!-- 2. Incident Details -->
+                    <uxap:ObjectPageSection id="sectionIncident" title="Incident Details" titleUppercase="false">
+                        <uxap:subSections>
 
-                    <Label text="{i18n>caseClosedAt}"/>
-                    <Text text="{caseClosedAt}"/>
+                            <uxap:ObjectPageSubSection id="subIncidentInfo" title="Incident Information">
+                                <uxap:blocks>
+                                    <form:SimpleForm editable="false" layout="ColumnLayout"
+                                        columnsM="2" columnsL="2" columnsXL="3">
+                                        <Label text="{i18n>incidentDate}"/>
+                                        <Text text="{path: 'incidentDate', type: 'sap.ui.model.odata.type.Date'}"/>
 
-                    <Label text="{i18n>reopenReason}"/>
-                    <Text text="{reopenReason}"/>
-                </form:SimpleForm>
-            </Panel>
+                                        <Label text="{i18n>incidentLocation}"/>
+                                        <Text text="{incidentLocation}"/>
 
-            <!-- Audit information -->
-            <Panel headerText="Audit Information" class="sapUiResponsiveMargin" width="auto">
-                <form:SimpleForm editable="false" layout="ColumnLayout"
-                    columnsM="2" columnsL="2" columnsXL="3">
-                    <Label text="{i18n>createdBy}"/>
-                    <Text text="{createdBy}"/>
+                                        <Label text="Allegation Category"/>
+                                        <Text text="{category/categoryName}"/>
 
-                    <Label text="{i18n>createdAt}"/>
-                    <Text text="{createdAt}"/>
+                                        <Label text="{i18n>caseDescription}"/>
+                                        <Text text="{caseDescription}"/>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
 
-                    <Label text="{i18n>modifiedBy}"/>
-                    <Text text="{modifiedBy}"/>
+                            <uxap:ObjectPageSubSection id="subDocuments" title="Supporting Documents">
+                                <uxap:blocks>
+                                    <Table
+                                        id="supportingDocsTable"
+                                        items="{path: 'documents'}"
+                                        noDataText="No supporting documents uploaded."
+                                        growing="true"
+                                        growingThreshold="10">
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title text="Documents"/>
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <columns>
+                                            <Column><Text text="File Name"/></Column>
+                                            <Column width="8rem"><Text text="Type"/></Column>
+                                            <Column width="8rem"><Text text="Size"/></Column>
+                                            <Column width="12rem"><Text text="Uploaded On"/></Column>
+                                            <Column width="8rem" hAlign="Center"><Text text="Actions"/></Column>
+                                        </columns>
+                                        <items>
+                                            <ColumnListItem vAlign="Middle">
+                                                <cells>
+                                                    <ObjectIdentifier title="{fileName}"/>
+                                                    <Text text="{parts: ['mediaType', 'fileName'], formatter: 'formatter.fileType'}"/>
+                                                    <Text text="{path: 'fileSize', formatter: 'formatter.fileSize'}"/>
+                                                    <Text text="{path: 'createdAt', type: 'sap.ui.model.odata.type.DateTimeOffset', formatOptions: {style: 'medium'}}"/>
+                                                    <HBox justifyContent="Center">
+                                                        <Button icon="sap-icon://show" type="Transparent"
+                                                            tooltip="Preview" press=".onPreviewDocument"/>
+                                                        <Button icon="sap-icon://download" type="Transparent"
+                                                            tooltip="Download" press=".onDownloadDocument"/>
+                                                    </HBox>
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
+                                    </Table>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
 
-                    <Label text="{i18n>modifiedAt}"/>
-                    <Text text="{modifiedAt}"/>
-                </form:SimpleForm>
-            </Panel>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
+                    <!-- 3. People and Dates -->
+                    <uxap:ObjectPageSection id="sectionPeople" title="People and Dates" titleUppercase="false">
+                        <uxap:subSections>
+
+                            <uxap:ObjectPageSubSection id="subPeople" title="People Involved">
+                                <uxap:blocks>
+                                    <form:SimpleForm editable="false" layout="ColumnLayout"
+                                        columnsM="2" columnsL="2" columnsXL="3">
+                                        <Label text="{i18n>lineManager}"/>
+                                        <Text text="{lineManagerID}"/>
+
+                                        <Label text="{i18n>hrbp}"/>
+                                        <Text text="{hrbpID}"/>
+
+                                        <Label text="{i18n>erCaseManager}"/>
+                                        <Text text="{erCaseManagerID}"/>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <uxap:ObjectPageSubSection id="subDates" title="Key Dates">
+                                <uxap:blocks>
+                                    <form:SimpleForm editable="false" layout="ColumnLayout"
+                                        columnsM="2" columnsL="2" columnsXL="3">
+                                        <Label text="{i18n>allegationIssuedAt}"/>
+                                        <Text text="{allegationIssuedAt}"/>
+
+                                        <Label text="{i18n>caseClosedAt}"/>
+                                        <Text text="{caseClosedAt}"/>
+
+                                        <Label text="{i18n>reopenReason}"/>
+                                        <Text text="{reopenReason}"/>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
+                    <!-- 4. Employee Response (NEW) -->
+                    <uxap:ObjectPageSection id="sectionResponse" title="Employee Response" titleUppercase="false">
+                        <uxap:subSections>
+
+                            <uxap:ObjectPageSubSection id="subResponseDetails" title="Response Details">
+                                <uxap:blocks>
+                                    <VBox>
+                                        <!-- Shown when no response has been submitted -->
+                                        <MessageStrip
+                                            visible="{= !${} &amp;&amp; !${} }"
+                                            text="No response has been submitted by the employee yet."
+                                            type="Information"
+                                            showIcon="true"/>
+
+                                        <!-- Shown when a response exists -->
+                                        <form:SimpleForm
+                                            visible="{= !!${} || !!${responseDescription} }"
+                                            editable="false" layout="ColumnLayout"
+                                            columnsM="1" columnsL="1" columnsXL="2">
+                                            <Label text="Response Date"/>
+                                            <Text text="{path: '', type: 'sap.ui.model.odata.type.Date'}"/>
+
+                                            <Label text="Response Description"/>
+                                            <Text text="{}"/>
+                                        </form:SimpleForm>
+                                    </VBox>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                            <uxap:ObjectPageSubSection id="subResponseDocs" title="Response Documents">
+                                <uxap:blocks>
+                                    <Table
+                                        id="responseDocsTable"
+                                        items="{path: ''}"
+                                        noDataText="No response documents uploaded."
+                                        growing="true"
+                                        growingThreshold="10">
+                                        <headerToolbar>
+                                            <OverflowToolbar>
+                                                <Title text="Documents"/>
+                                            </OverflowToolbar>
+                                        </headerToolbar>
+                                        <columns>
+                                            <Column><Text text="File Name"/></Column>
+                                            <Column width="8rem"><Text text="Type"/></Column>
+                                            <Column width="8rem"><Text text="Size"/></Column>
+                                            <Column width="12rem"><Text text="Uploaded On"/></Column>
+                                            <Column width="8rem" hAlign="Center"><Text text="Actions"/></Column>
+                                        </columns>
+                                        <items>
+                                            <ColumnListItem vAlign="Middle">
+                                                <cells>
+                                                    <ObjectIdentifier title="{fileName}"/>
+                                                    <Text text="{parts: ['mediaType', 'fileName'], formatter: 'formatter.fileType'}"/>
+                                                    <Text text="{path: 'fileSize', formatter: 'formatter.fileSize'}"/>
+                                                    <Text text="{path: 'createdAt', type: 'sap.ui.model.odata.type.DateTimeOffset', formatOptions: {style: 'medium'}}"/>
+                                                    <HBox justifyContent="Center">
+                                                        <Button icon="sap-icon://show" type="Transparent"
+                                                            tooltip="Preview" press=".onPreviewDocument"/>
+                                                        <Button icon="sap-icon://download" type="Transparent"
+                                                            tooltip="Download" press=".onDownloadDocument"/>
+                                                    </HBox>
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
+                                    </Table>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
+                    <!-- 5. Audit Information -->
+                    <uxap:ObjectPageSection id="sectionAudit" title="Audit Information" titleUppercase="false">
+                        <uxap:subSections>
+                            <uxap:ObjectPageSubSection id="subAudit" title="Audit Information">
+                                <uxap:blocks>
+                                    <form:SimpleForm editable="false" layout="ColumnLayout"
+                                        columnsM="2" columnsL="2" columnsXL="3">
+                                        <Label text="{i18n>createdBy}"/>
+                                        <Text text="{createdBy}"/>
+
+                                        <Label text="{i18n>createdAt}"/>
+                                        <Text text="{createdAt}"/>
+
+                                        <Label text="{i18n>modifiedBy}"/>
+                                        <Text text="{modifiedBy}"/>
+
+                                        <Label text="{i18n>modifiedAt}"/>
+                                        <Text text="{modifiedAt}"/>
+                                    </form:SimpleForm>
+                                </uxap:blocks>
+                            </uxap:ObjectPageSubSection>
+                        </uxap:subSections>
+                    </uxap:ObjectPageSection>
+
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
         </content>
     </Page>
 </mvc:View>

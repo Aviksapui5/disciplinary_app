@@ -6,15 +6,15 @@ sap.ui.define([
     "sap/ui/Device",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "../model/formatter"
-], (Controller, JSONModel, Filter, FilterOperator, Device, MessageToast, MessageBox,formatter) => {
+    "../model/formatter",
+    "../model/DocumentHelper"                                   // NEW
+], (Controller, JSONModel, Filter, FilterOperator, Device, MessageToast, MessageBox, formatter, DocumentHelper) => {
     "use strict";
 
     return Controller.extend("com.emp.discip.employeedisciplinarycase.controller.employeeDisplay", {
         formatter: formatter,
-        onInit() {
-            this._aSelectedFiles = [];
 
+        onInit() {
             // Device model (back button on phones)
             const oDeviceModel = new JSONModel(Device);
             oDeviceModel.setDefaultBindingMode("OneWay");
@@ -22,12 +22,10 @@ sap.ui.define([
 
             // Local model for the response form
             this.getView().setModel(new JSONModel({
-                response: { date: "", text: "" }
+                response: { date: "", text: "" },
+                documents: []                                   // CHANGED: files shown in the table
             }), "ui");
-
-            // Cases come from the default OData V4 model (manifest: mainService)
         },
-
 
         // ---------- List selection ----------
 
@@ -35,7 +33,6 @@ sap.ui.define([
             const oList = this.byId("caseList");
             const aItems = oList.getItems();
 
-            // Laptop / tablet: show the first case by default
             if (!Device.system.phone && !oList.getSelectedItem() && aItems.length) {
                 oList.setSelectedItem(aItems[0]);
                 this._showCase(aItems[0]);
@@ -63,40 +60,39 @@ sap.ui.define([
         // ---------- Search ----------
 
         onSearch(oEvent) {
-    const sQuery = (oEvent.getParameter("newValue") ||
-                    oEvent.getParameter("query") || "").trim();
-    const aFilters = [];
+            const sQuery = (oEvent.getParameter("newValue") ||
+                            oEvent.getParameter("query") || "").trim();
+            const aFilters = [];
 
-    if (sQuery) {
-        aFilters.push(new Filter({
-            filters: [
-                new Filter({ path: "caseID", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false }),
-                new Filter({ path: "category/categoryName", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false }),
-                new Filter({ path: "status/statusDescription", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false })
-            ],
-            and: false
-        }));
-    }
+            if (sQuery) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter({ path: "caseID", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false }),
+                        new Filter({ path: "category/categoryName", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false }),
+                        new Filter({ path: "status/statusDescription", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false })
+                    ],
+                    and: false
+                }));
+            }
 
-    this.byId("caseList").getBinding("items").filter(aFilters);
-},
+            this.byId("caseList").getBinding("items").filter(aFilters);
+        },
 
-         // ---------- Response form ----------
+        // ---------- Response form ----------
 
         onFieldChange() {
             this.byId("responseDate").setValueState("None");
             this.byId("responseText").setValueState("None");
         },
 
-        // ---------- FileUploader ----------
+        // ---------- Documents table (CHANGED / NEW) ----------
 
         onFileChange(oEvent) {
-            const aFiles = oEvent.getParameter("files") || [];
-            this._aSelectedFiles = Array.from(aFiles);
+            const oUploader = oEvent.getSource();
+            const aFiles = Array.from(oEvent.getParameter("files") || []);   // copy before clear()
 
-            if (this._aSelectedFiles.length > 0) {
-                MessageToast.show(this._aSelectedFiles.length + " file(s) selected successfully");
-            }
+            DocumentHelper.addFiles(this.getView().getModel("ui"), "/documents", aFiles);
+            oUploader.clear();   // lets the user pick the same file again later
         },
 
         onTypeMissmatch() {
@@ -107,6 +103,24 @@ sap.ui.define([
             MessageBox.error("File size exceeded. Maximum allowed file size is 10 MB.");
         },
 
+        onDocumentSearch(oEvent) {
+            let sQuery = oEvent.getParameter("newValue");
+            if (sQuery === undefined) { sQuery = oEvent.getParameter("query"); }
+            DocumentHelper.filterByName(this.byId("documentsTable"), sQuery);
+        },
+
+        onDocumentPreview(oEvent) {
+            DocumentHelper.preview(oEvent.getSource().getBindingContext("ui").getObject());
+        },
+
+        onDocumentRemove(oEvent) {
+            DocumentHelper.removeFile(
+                this.getView().getModel("ui"),
+                "/documents",
+                oEvent.getSource().getBindingContext("ui").getObject()
+            );
+        },
+
         // ---------- Submit response ----------
 
         onSubmit() {
@@ -114,7 +128,6 @@ sap.ui.define([
             const oText = this.byId("responseText");
             let bValid = true;
 
-            // Step 1: check the required fields
             if (!oDate.getValue()) {
                 oDate.setValueState("Error");
                 oDate.setValueStateText("Response date is required");
@@ -132,7 +145,6 @@ sap.ui.define([
                 return;
             }
 
-            // Step 2: check the selected case
             const oContext = this.byId("detailPage").getBindingContext();
             if (!oContext) {
                 MessageToast.show("Please select a case first");
@@ -144,7 +156,6 @@ sap.ui.define([
                 return;
             }
 
-            // Step 3: ask for confirmation, then create the response
             MessageBox.confirm(
                 "Submit your response? You will not be able to edit it afterwards.",
                 {
@@ -163,12 +174,11 @@ sap.ui.define([
         // Change the names on the LEFT side when the real entity fields are known.
         _buildResponsePayload(oCase, oResponse, aFiles) {
             const oPayload = {
-                case_ID: oCase.ID,                    // link to the selected case
-                responseDate: oResponse.date,         // yyyy-MM-dd
-                responseDescription: oResponse.text   // response text
+                case_ID: oCase.ID,
+                responseDate: oResponse.date,
+                responseDescription: oResponse.text
             };
 
-            // Files are sent together with the response
             if (aFiles.length) {
                 oPayload["attachments"] = aFiles.map((oFile) => ({
                     fileName: oFile.fileName,
@@ -181,7 +191,7 @@ sap.ui.define([
             return oPayload;
         },
 
-        // Reads the selected files in the browser and returns them as base64 text
+        // Reads the File objects in the browser and returns them as base64 text
         _readFiles(aFiles) {
             return Promise.all(aFiles.map((oFile) => new Promise((resolve, reject) => {
                 const oReader = new FileReader();
@@ -190,7 +200,7 @@ sap.ui.define([
                     fileName: oFile.name,
                     mediaType: oFile.type || "application/octet-stream",
                     fileSize: oFile.size,
-                    content: String(oReader.result).split(",")[1]   // remove the "data:...;base64," start
+                    content: String(oReader.result).split(",")[1]
                 });
                 oReader.onerror = () => reject(oReader.error);
 
@@ -201,18 +211,20 @@ sap.ui.define([
         _createResponse(oContext) {
             const oModel = this.getView().getModel();
             const oDetailPage = this.byId("detailPage");
-            const oResponse = this.getView().getModel("ui").getProperty("/response");
+            const oUi = this.getView().getModel("ui");
+            const oResponse = oUi.getProperty("/response");
             const oCase = oContext.getObject();
+
+            // CHANGED: take the real File objects from the table
+            const aRawFiles = (oUi.getProperty("/documents") || []).map((oDoc) => oDoc.file);
 
             oDetailPage.setBusy(true);
 
-            // Read the files first, then send response + files in one request
-            this._readFiles(this._aSelectedFiles.slice())
+            this._readFiles(aRawFiles)
                 .then((aFiles) => {
                     const oPayload = this._buildResponsePayload(oCase, oResponse, aFiles);
                     const oListBinding = oModel.bindList("/CaseResponses");
 
-                    // Runs after the request finished (success or failure)
                     oListBinding.attachEventOnce("createCompleted", (oEvent) => {
                         const bSuccess = oEvent.getParameter("success");
                         const oCreatedContext = oEvent.getParameter("context");
@@ -225,16 +237,14 @@ sap.ui.define([
                                 (aFiles.length ? " with " + aFiles.length + " document(s)" : "")
                             );
 
-                            this._resetForm();
+                            this._resetForm();   // also clears the documents table
 
-                            // Reload the selected case and the list to show the latest status
                             const oElementBinding = oDetailPage.getElementBinding();
                             if (oElementBinding) {
                                 oElementBinding.refresh();
                             }
                             this.byId("caseList").getBinding("items").refresh();
                         } else {
-                            // Remove the failed entry so it is not sent again
                             oCreatedContext.delete().catch(() => { /* ignore */ });
 
                             MessageBox.error(
@@ -246,10 +256,7 @@ sap.ui.define([
                         oListBinding.destroy();
                     });
 
-                    // Send the request
                     const oCreatedContext = oListBinding.create(oPayload);
-
-                    // Stops an "uncaught promise" message when a failed entry is deleted above
                     oCreatedContext.created().catch(() => { /* ignore */ });
                 })
                 .catch(() => {
@@ -260,19 +267,20 @@ sap.ui.define([
 
         // ---------- Reset ----------
 
-        _clearFileUploader() {
-            const oUploader = this.byId("fileUploader");
-            if (oUploader) {
-                oUploader.clear();
-            }
-            this._aSelectedFiles = [];
-        },
-
         _resetForm() {
-            this.getView().getModel("ui").setProperty("/response", { date: "", text: "" });
+            const oUi = this.getView().getModel("ui");
+
+            DocumentHelper.releaseAll(oUi, "/documents");          // CHANGED: free blob URLs
+            oUi.setProperty("/documents", []);                     // CHANGED: empty the table
+            oUi.setProperty("/response", { date: "", text: "" });
+
             this.byId("responseDate").setValueState("None");
             this.byId("responseText").setValueState("None");
-            this._clearFileUploader();
+
+            const oTable = this.byId("documentsTable");            // clear the table search filter
+            if (oTable && oTable.getBinding("items")) {
+                oTable.getBinding("items").filter([]);
+            }
         }
     });
 });
