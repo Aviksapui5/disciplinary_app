@@ -1,1 +1,7 @@
 /* Enter your custom styles here */
+/* Wider master list on tablet / laptop / desktop (phones keep full width) */
+@media (min-width: 600px) {
+    .empSplitApp > .sapMSplitContainerMaster {
+        width: 400px;
+    }
+}

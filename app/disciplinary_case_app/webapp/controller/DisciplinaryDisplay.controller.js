@@ -1,15 +1,3 @@
-// sap.ui.define([
-//     "sap/ui/core/mvc/Controller"
-// ], (Controller) => {
-//     "use strict";
-
-//     return Controller.extend("disciplinary.app.disciplinarycaseapp.controller.DisciplinaryDisplay", {
-//         onInit() {
-//         }
-//     });
-// });
-
-
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/FilterType",

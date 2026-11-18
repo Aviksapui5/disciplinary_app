@@ -4,23 +4,27 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form"
-    xmlns:upload="sap.m.upload"
     xmlns:u="sap.ui.unified"
     xmlns:l="sap.ui.layout"
     displayBlock="true"
     height="100%">
 
-    <SplitApp id="splitApp" initialMaster="masterPage" initialDetail="detailPage" masterButtonText=" ">
+    <SplitApp id="splitApp" initialMaster="masterPage" initialDetail="detailPage" masterButtonText=" " class="empSplitApp">
 
         <!-- ================= MASTER : CASES LIST ================= -->
         <masterPages>
-           <Page id="masterPage" title="Disciplinary Cases">
+            <Page id="masterPage" title="Disciplinary Cases">
                 <List
                     id="caseList"
-                    items="{cases>/cases}"
+                    items="{
+                        path: '/Cases',
+                        sorter: { path: 'caseID' }
+                    }"
                     mode="SingleSelectMaster"
                     selectionChange="onCaseSelect"
                     updateFinished="onListUpdateFinished"
+                    growing="true"
+                    growingThreshold="20"
                     noDataText="No cases found">
 
                     <headerToolbar>
@@ -32,7 +36,7 @@
                     <infoToolbar>
                         <Toolbar>
                             <SearchField
-                                placeholder="Case ID or category"
+                                placeholder="Case ID, category or status"
                                 liveChange="onSearch"
                                 search="onSearch"
                                 width="100%"/>
@@ -40,20 +44,65 @@
                     </infoToolbar>
 
                     <ObjectListItem
-                        title="{cases>caseId}"
+                        title="{caseID}"
                         type="Active">
                         <firstStatus>
                             <ObjectStatus
-                                text="{cases>status}"
-                                state="{= ${cases>status} === 'Responded' ? 'Success' : 'Warning'}"/>
+                                text="{path: 'status_statusCode', formatter: '.formatter.statusText'}"
+                                state="{path: 'status_statusCode', formatter: '.formatter.statusState'}"/>
                         </firstStatus>
                         <attributes>
-                            <ObjectAttribute text="{cases>category}"/>
-                            <ObjectAttribute text="Reported: {cases>reportedDate}"/>
+                            <ObjectAttribute text="{category/categoryName}"/>
+                            <ObjectAttribute text="Incident: {incidentDate}"/>
                         </attributes>
                     </ObjectListItem>
                 </List>
             </Page>
+            <!-- <Page id="masterPage" title="Disciplinary Cases">
+
+                
+                <subHeader>
+                    <VBox width="100%">
+                        <Toolbar>
+                            <SearchField
+                                placeholder="Case ID, category or status"
+                                liveChange="onSearch"
+                                search="onSearch"
+                                width="100%"/>
+                        </Toolbar>
+                    </VBox>
+                </subHeader>
+
+               
+                <List
+                    id="caseList"
+                    items="{
+                        path: '/Cases',
+                        sorter: { path: 'caseID' }
+                    }"
+                    mode="SingleSelectMaster"
+                    selectionChange="onCaseSelect"
+                    updateFinished="onListUpdateFinished"
+                    growing="true"
+                    growingThreshold="20"
+                    class="sapUiSmallMarginTop"
+                    noDataText="No cases found">
+
+                    <ObjectListItem
+                        title="{caseID}"
+                        type="Active">
+                        <firstStatus>
+                            <ObjectStatus
+                                text="{path: 'status_statusCode', formatter: '.formatter.statusText'}"
+                                state="{path: 'status_statusCode', formatter: '.formatter.statusState'}"/>
+                        </firstStatus>
+                        <attributes>
+                            <ObjectAttribute text="{category/categoryName}"/>
+                            <ObjectAttribute text="Incident: {incidentDate}"/>
+                        </attributes>
+                    </ObjectListItem>
+                </List>
+            </Page> -->
         </masterPages>
 
         <!-- ================= DETAIL : CASE DETAILS + REPLY ================= -->
@@ -63,26 +112,26 @@
                 title="Case details"
                 showNavButton="{device>/system/phone}"
                 navButtonPress="onNavBack"
-                showFooter="{= ${cases>status} !== 'Responded'}">
+                showFooter="{= ${path: 'status_statusCode', targetType: 'any'} !== 'CLOSED' }">
 
                 <content>
-                    <!-- Deadline banner -->
+                    <!-- Info banner (hidden when the case is closed) -->
                     <MessageStrip
                         class="sapUiSmallMargin"
                         type="Warning"
                         showIcon="true"
-                        visible="{= ${cases>status} !== 'Responded'}"
-                        text="Response deadline: {cases>deadline} - please reply before this date"/>
+                        visible="{= ${path: 'status_statusCode', targetType: 'any'} !== 'CLOSED' }"
+                        text="Please review the case details and submit your response."/>
 
                     <!-- Case details (read only) -->
                     <Panel class="sapUiResponsiveMargin" width="auto">
                         <headerToolbar>
                             <Toolbar>
-                                <Title text="Case details · {cases>caseId}"/>
+                                <Title text="Case details · {caseID}"/>
                                 <ToolbarSpacer/>
                                 <ObjectStatus
-                                    text="{cases>status}"
-                                    state="{= ${cases>status} === 'Responded' ? 'Success' : 'Warning'}"/>
+                                    text="{path: 'status_statusCode', formatter: '.formatter.statusText'}"
+                                state="{path: 'status_statusCode', formatter: '.formatter.statusState'}"/>
                             </Toolbar>
                         </headerToolbar>
                         <content>
@@ -97,23 +146,27 @@
                                 <form:content>
                                     <core:Title text="Allegation"/>
                                     <Label text="Allegation category"/>
-                                    <Text text="{cases>category}"/>
+                                    <Text text="{category/categoryName}"/>
                                     <Label text="Incident location"/>
-                                    <Text text="{cases>location}"/>
+                                    <Text text="{incidentLocation}"/>
 
                                     <core:Title text="Dates"/>
                                     <Label text="Incident date"/>
-                                    <Text text="{cases>incidentDate}"/>
+                                    <Text text="{incidentDate}"/>
                                     <Label text="Reported date"/>
-                                    <Text text="{cases>reportedDate}"/>
+                                    <Text text=""/>
                                     <Label text="Response deadline"/>
-                                    <Text text="{cases>deadline}"/>
+                                    <Text text=""/>
                                 </form:content>
                             </form:SimpleForm>
 
                             <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
-                                <Label text="Case description"/>
-                                <Text text="{cases>description}"/>
+                                <Label text="Case description:"/>
+                                <Text text="{caseDescription}"/>
+                            </VBox>
+                            <VBox class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                                <Label text="Supporting Documents:"/>
+                                <Text text=""/>
                             </VBox>
                         </content>
                     </Panel>
@@ -139,11 +192,10 @@
                                     <Label text="Response date" required="true" labelFor="responseDate"/>
                                     <DatePicker
                                         id="responseDate"
-                                        value="{cases>response/date}"
-                                        valueFormat="dd-MM-yy"
+                                        value="{ui>/response/date}"
+                                        valueFormat="yyyy-MM-dd"
                                         displayFormat="dd-MM-yy"
                                         placeholder="Select response date"
-                                        enabled="{= ${cases>status} !== 'Responded'}"
                                         change="onFieldChange">
                                         <layoutData>
                                             <l:GridData span="XL3 L4 M6 S12"/>
@@ -153,13 +205,12 @@
                                     <Label text="Response description" required="true" labelFor="responseText"/>
                                     <TextArea
                                         id="responseText"
-                                        value="{cases>response/text}"
+                                        value="{ui>/response/text}"
                                         rows="6"
                                         maxLength="5000"
                                         showExceededText="true"
                                         valueLiveUpdate="true"
                                         placeholder="Write your response to this allegation"
-                                        enabled="{= ${cases>status} !== 'Responded'}"
                                         liveChange="onFieldChange">
                                         <layoutData>
                                             <l:GridData span="XL8 L8 M12 S12"/>
@@ -173,7 +224,6 @@
                                         placeholder="Choose documents"
                                         buttonText="Browse"
                                         tooltip="Select documents to attach"
-                                        enabled="{= ${cases>status} !== 'Responded'}"
                                         multiple="true"
                                         uploadOnChange="false"
                                         fileType="pdf,doc,docx,xls,xlsx,jpg,jpeg,png,txt"
@@ -194,10 +244,8 @@
                 </content>
 
                 <footer>
-                    <!-- <OverflowToolbar visible="{= ${cases>status} !== 'Responded'}"> -->
                     <OverflowToolbar>
                         <ToolbarSpacer/>
-                        <!-- <Button text="Save draft" press="onSaveDraft"/> -->
                         <Button text="Submit response" type="Emphasized" press="onSubmit"/>
                     </OverflowToolbar>
                 </footer>
