@@ -11,8 +11,8 @@ sap.ui.define([
 ], function (MessageToast, Dialog, Button, Image, Text, TextArea, HTML, Filter, FilterOperator) {
     "use strict";
 
-    var MAX_FILES = 10;
-    var MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+    var MAX_FILES = 5;
+    var MAX_SIZE = 1 * 1024 * 1024; // 1 MB
     var ALLOWED = ["pdf", "doc", "docx", "xls", "xlsx", "jpg", "jpeg", "png", "txt"];
     var IMAGES = ["jpg", "jpeg", "png"];
 
@@ -58,7 +58,7 @@ sap.ui.define([
                     return;
                 }
                 if (oFile.size > MAX_SIZE) {
-                    aErrors.push(oFile.name + ": exceeds 10 MB");
+                    aErrors.push(oFile.name + ": exceeds 1 MB");
                     return;
                 }
                 if (aDocs.length >= MAX_FILES) {
@@ -114,6 +114,28 @@ sap.ui.define([
         /* Call when the case is discarded or submitted (frees browser memory) */
         releaseAll: function (oCaseModel) {
             (oCaseModel.getProperty("/documents") || []).forEach(_revoke);
+        },
+        /* Converts the selected files to the backend "Attachments" structure.
+        fileContent = pure base64 text (the "data:...;base64," prefix is removed). */
+        toAttachments: function (aDocs) {
+            return Promise.all((aDocs || []).map(function (oDoc) {
+                return new Promise(function (resolve, reject) {
+                    var oReader = new FileReader();
+
+                    oReader.onload = function () {
+                        resolve({
+                            fileName: oDoc.fileName,
+                            fileType: oDoc.extension,                                  // PDF, DOCX ...
+                            mimeType: oDoc.mimeType || "application/octet-stream",
+                            fileSize: String(oDoc.fileSize),                           // Integer64 -> send as string
+                            fileContent: String(oReader.result).split(",")[1]          // base64 text
+                        });
+                    };
+                    oReader.onerror = function () { reject(oReader.error); };
+
+                    oReader.readAsDataURL(oDoc.file);                                  // the real File object
+                });
+            }));
         },
 
         filterByName: function (oTable, sQuery) {

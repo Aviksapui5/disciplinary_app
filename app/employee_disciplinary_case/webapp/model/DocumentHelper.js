@@ -11,8 +11,8 @@ sap.ui.define([
 ], function (MessageToast, Dialog, Button, Image, Text, TextArea, HTML, Filter, FilterOperator) {
     "use strict";
 
-    var MAX_FILES = 10;
-    var MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+    var MAX_FILES = 5;
+    var MAX_SIZE = 1 * 1024 * 1024; // 1 MB
     var ALLOWED = ["pdf", "doc", "docx", "xls", "xlsx", "jpg", "jpeg", "png", "txt"];
     var IMAGES = ["jpg", "jpeg", "png"];
 
@@ -58,7 +58,7 @@ sap.ui.define([
                     return;
                 }
                 if (oFile.size > MAX_SIZE) {
-                    aErrors.push(oFile.name + ": exceeds 10 MB");
+                    aErrors.push(oFile.name + ": exceeds 1 MB");
                     return;
                 }
                 if (aDocs.length >= MAX_FILES) {

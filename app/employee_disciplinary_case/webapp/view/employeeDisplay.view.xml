@@ -292,7 +292,7 @@
                                 </Table>
 
                                 <Text
-                                    text="Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT. Max 10 MB per file, up to 10 files."
+                                    text="Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT. Max 1 MB per file, up to 5 files."
                                     class="sapUiTinyMarginTop"/>
                             </VBox>
                         </content>

@@ -38,39 +38,6 @@
                                             text="Employee"
                                             required="true"
                                             width="5rem"/>
-
-                                        <!-- <Input
-                                            id="employeeInput"
-                                            placeholder="Search by ID Or name"
-                                            showSuggestion="true"
-                                            filterSuggests="false"
-                                            startSuggestion="1"
-                                            showValueHelp="true"
-                                            valueHelpOnly="false"
-                                            valueHelpRequest=".onEmployeeValueHelp"
-                                            suggest=".onEmployeeSuggest"
-                                            suggestionItemSelected=".onEmployeeSuggestionSelected"
-                                            suggestionItems="{master>/employees}"
-                                            value="{= ${case>/employee/employeeID}
-                                                ? ${case>/employee/displayName}
-                                                + ' (' + ${case>/employee/employeeID} + ')'
-                                                : '' }">
-                                             <layoutData>
-                                                    <FlexItemData
-                                                        growFactor="0"
-                                                        shrinkFactor="1"
-                                                        baseSize="28rem"/>
-                                                </layoutData>
-
-
-                                            <suggestionItems>
-                                                <SuggestionItem
-                                                    key="{master>employeeID}"
-                                                    text="{master>displayName}"
-                                                    description="{master>employeeID} | {master>departmentName} | {master>position}"/>
-                                            </suggestionItems>
-
-                                        </Input> -->
                                         <Input
                                             id="employeeInput"
                                             placeholder="Search by ID Or name"
@@ -435,9 +402,14 @@
                                                                     width="75%"
                                                                     forceSelection="false"
                                                                     selectedKey="{case>/categoryID}"
+                                                                    items="{/AllegationCategories}"
                                                                     change=".onCategoryChange">
 
                                                                     <core:Item
+                                                                        key="{categoryID}"
+                                                                        text="{categoryName}"/>
+
+                                                                    <!-- <core:Item
                                                                         key="C01"
                                                                         text="Absenteeism"/>
 
@@ -455,7 +427,7 @@
 
                                                                     <core:Item
                                                                         key="C05"
-                                                                        text="Performance"/>
+                                                                        text="Performance"/> -->
 
                                                                 </Select>
                                                             </form:fields>
@@ -648,7 +620,7 @@
                                         </Table>
 
                                         <Text
-                                            text="Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT. Max 10 MB per file, up to 10 files."
+                                            text="Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT. Max 1 MB per file, up to 5 files."
                                             class="sapUiTinyMarginTop"/>
                                     </VBox>
                                  </VBox>

@@ -1,11 +1,12 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/m/MessageBox",
+    "sap/m/BusyDialog",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "disciplinary/app/disciplinarycaseapp/model/formatter",
     "disciplinary/app/disciplinarycaseapp/model/DocumentHelper"
-], function (Controller, MessageBox, Filter, FilterOperator, formatter,DocumentHelper) {
+], function (Controller, MessageBox,BusyDialog, Filter, FilterOperator, formatter, DocumentHelper) {
     "use strict";
 
     return Controller.extend("disciplinary.app.disciplinarycaseapp.controller.PreviewCase", {
@@ -15,8 +16,24 @@ sap.ui.define([
         onInit: function () {
             this._oRouter = this.getOwnerComponent().getRouter();
             this._oCase = this.getOwnerComponent().getModel("case");
+
+            // Loading dialog displayed while returning to Cases
+            this._oReturningDialog = new BusyDialog({
+                title: "Please Wait",
+                text: "Returning to Cases screen..."
+            });
+
             this._oRouter.getRoute("RoutePreviewCase")
                 .attachPatternMatched(this._onMatched, this);
+
+            // Close loading dialog once Cases screen is reached
+            this._oRouter.getRoute("RouteDisciplinaryDisplay")
+                .attachPatternMatched(this._onCasesRouteMatched, this);
+        },
+        _onCasesRouteMatched: function () {
+            if (this._oReturningDialog) {
+                this._oReturningDialog.close();
+            }
         },
 
         // if the browser was refreshed, data is gone -> go back to create
@@ -39,6 +56,22 @@ sap.ui.define([
             DocumentHelper.download(oEvent.getSource().getBindingContext("case").getObject());
         },
 
+        /* ---------- Documents table ---------- */
+        onDocumentSearch: function (oEvent) {
+            var sQuery = oEvent.getParameter("newValue");
+            if (sQuery === undefined) { sQuery = oEvent.getParameter("query"); }
+            DocumentHelper.filterByName(this.byId("previewDocumentsTable"), sQuery);
+        },
+
+        onDocumentPreview: function (oEvent) {
+            DocumentHelper.preview(oEvent.getSource().getBindingContext("case").getObject());
+        },
+
+        onDocumentDownload: function (oEvent) {
+            DocumentHelper.download(oEvent.getSource().getBindingContext("case").getObject());
+        },
+
+        /* ---------- Navigation ---------- */
         onEdit: function () {
             this._oRouter.navTo("RouteCreateEmployee", {}, true);   // data is kept
         },
@@ -55,6 +88,7 @@ sap.ui.define([
             });
         },
 
+        /* ---------- Submit: case + all attachments in ONE deep create ---------- */
         onSubmit: function () {
             if (this._bSubmitting) { return; }
 
@@ -67,21 +101,8 @@ sap.ui.define([
             var sRef = (oData.caseReference || "").trim();
             if (!sRef) {
                 sRef = "DMA-" + new Date().getFullYear() + "-" + Date.now().toString().slice(-6);
-                this._oCase.setProperty("/caseReference", sRef);   // keep it in the model
+                this._oCase.setProperty("/caseReference", sRef);
             }
-
-            // only fields that exist in the Cases entity
-            var oPayload = {
-                caseReference: sRef,                                   // required by the entity
-                employee_employeeID: oData.employee.employeeID,
-                department_departmentID: oData.employee.departmentID || null,
-                category_categoryID: oData.categoryID,
-                status_statusCode: "OPENED",
-                incidentDate: oData.incidentDate || null,              // must be yyyy-MM-dd (Edm.Date)
-                incidentLocation: oData.incidentLocation || null,
-                caseDescription: oData.caseDescription || null,
-                lineManagerID: oData.employee.managerID || null
-            };
 
             var fnReset = function () {
                 this._bSubmitting = false;
@@ -93,7 +114,38 @@ sap.ui.define([
             oView.setBusy(true);
             oSubmitBtn.setEnabled(false);
 
-            var oListBinding = oModel.bindList("/Cases");   // Cases entity set
+            // step 1: read all selected files and convert them to base64
+            DocumentHelper.toAttachments(oData.documents)
+                .then(function (aAttachments) {
+                    this._createCase(oModel, oData, sRef, aAttachments, fnReset);
+                }.bind(this))
+                .catch(function () {
+                    fnReset();
+                    MessageBox.error("The selected documents could not be read. Please go back and select them again.");
+                });
+        },
+
+        // step 2: POST the case together with its attachments array
+        _createCase: function (oModel, oData, sRef, aAttachments, fnReset) {
+
+            var oPayload = {
+                caseReference: sRef,
+                employee_employeeID: oData.employee.employeeID,
+                department_departmentID: oData.employee.departmentID || null,
+                category_categoryID: oData.categoryID,
+                status_statusCode: "OPENED",
+                incidentDate: oData.incidentDate || null,              // yyyy-MM-dd (Edm.Date)
+                incidentLocation: oData.incidentLocation || null,
+                caseDescription: oData.caseDescription || null,
+                lineManagerID: oData.employee.managerID || null
+            };
+
+            // multiple documents -> array in the "attachments" field (only when files exist)
+            if (aAttachments.length) {
+                oPayload.attachments = aAttachments;
+            }
+
+            var oListBinding = oModel.bindList("/Cases");   // <-- adjust if your service entity name differs
             var oContext;
 
             // fires after the POST finished, for success AND failure
@@ -103,34 +155,59 @@ sap.ui.define([
 
                 if (oEvent.getParameter("success")) {
                     var oCreated = oContext.getObject() || {};
-                    var sCreatedRef = oCreated.caseReference || sRef;
+                    var scaseID = oCreated.caseID || null;
+                    var sDocText = aAttachments.length
+                        ? "\nDocuments uploaded: " + aAttachments.length
+                        : "";
 
-                    /* ===== DOCUMENT UPLOAD - UNCOMMENT WHEN BACKEND IS CONFIRMED =====
-                    this._uploadDocuments(oCreated.caseID).then(function () {
-                        this._showSuccess(sCreatedRef);
-                    }.bind(this)).catch(function (oError) {
-                        // the case exists already, only the documents failed
-                        MessageBox.warning("Case " + sCreatedRef + " was created, but some documents " +
-                            "could not be uploaded. Please add them again from the case details.");
-                        console.error("Document upload failed:", oError && oError.message);
-                    });
-                    return;
-                    ===== END DOCUMENT UPLOAD ===== */
-
+                    // MessageBox.success(
+                    //     "Case submitted successfully.\nReference: " + scaseID + sDocText,
+                    //     {
+                    //         onClose: function () {
+                    //             DocumentHelper.releaseAll(this._oCase);
+                    //             this.getOwnerComponent().resetCase();
+                    //             this._oRouter.navTo("RouteDisciplinaryDisplay", {}, true);
+                    //         }.bind(this)
+                    //     }
+                    // );
                     MessageBox.success(
-                        "Case submitted successfully." + (sCreatedRef ? "\nReference: " + sCreatedRef : ""),
-                        {
-                            onClose: function () {
+                    "Case submitted successfully.\nCase Id: " +
+                    scaseID +
+                    sDocText,
+                    {
+                        title: "Success",
+                        actions: [MessageBox.Action.OK],
+                        onClose: function (sAction) {
+
+                            if (sAction === MessageBox.Action.OK) {
+
+                                // Show loading indicator immediately
+                                this._oReturningDialog.setText(
+                                    "Returning to Cases screen..."
+                                );
+                                this._oReturningDialog.open();
+
+                                // Release uploaded document resources
                                 DocumentHelper.releaseAll(this._oCase);
+
+                                // Reset the case form data
                                 this.getOwnerComponent().resetCase();
-                                this._oRouter.navTo("RouteDisciplinaryDisplay", {}, true);
-                            }.bind(this)
-                        }
-                    );
+
+                                // Navigate immediately
+                                this._oRouter.navTo(
+                                    "RouteDisciplinaryDisplay",
+                                    {},
+                                    true
+                                );
+                            }
+
+                        }.bind(this)
+                    }
+                );
                 } else {
                     // remove the failed entry so it is not resent
                     oContext.delete().catch(function () { /* ignore */ });
-                    MessageBox.error("Failed to create case.");
+                    MessageBox.error("Failed to create case. No data was saved, please try again.");
                 }
             }.bind(this);
 
@@ -146,63 +223,13 @@ sap.ui.define([
             }
         },
 
-        // /* Success dialog, reused after the documents are uploaded */
-        // _showSuccess: function (sCreatedRef) {
-        //     MessageBox.success("Case submitted successfully.\nReference: " + sCreatedRef, {
-        //         onClose: function () {
-        //             DocumentHelper.releaseAll(this._oCase);
-        //             this.getOwnerComponent().resetCase();
-        //             this._oRouter.navTo("RouteDisciplinaryDisplay", {}, true);
-        //         }.bind(this)
-        //     });
-        // },
-        //
-        // /* Two-step upload per file (typical CAP / OData V4 media pattern):
-        //    1) POST the metadata record  2) PUT the binary to its media stream.
-        //    Entity and property names below are PLACEHOLDERS - adjust to the backend. */
-        // _uploadDocuments: function (sCaseID) {
-        //     var oModel = this.getOwnerComponent().getModel();
-        //     var aDocs = this._oCase.getProperty("/documents") || [];
-        //     var sServiceUrl = oModel.getServiceUrl();            // e.g. /odata/v4/disciplinary/
-        //     var oCsrf = {};
-        //     var sToken = oModel.getHttpHeaders && oModel.getHttpHeaders()["X-CSRF-Token"];
-        //     if (sToken) { oCsrf["X-CSRF-Token"] = sToken; }
-        //
-        //     var fnCheck = function (oResponse) {
-        //         if (!oResponse.ok) { throw new Error("HTTP " + oResponse.status); }
-        //         return oResponse;
-        //     };
-        //
-        //     // upload files one after another
-        //     return aDocs.reduce(function (pPrev, oDoc) {
-        //         return pPrev.then(function () {
-        //             // step 1: metadata
-        //             return fetch(sServiceUrl + "CaseDocuments", {
-        //                 method: "POST",
-        //                 headers: Object.assign({ "Content-Type": "application/json" }, oCsrf),
-        //                 body: JSON.stringify({
-        //                     case_caseID: sCaseID,
-        //                     fileName: oDoc.fileName,
-        //                     mediaType: oDoc.mimeType || "application/octet-stream",
-        //                     fileSize: oDoc.fileSize
-        //                 })
-        //             })
-        //             .then(fnCheck)
-        //             .then(function (r) { return r.json(); })
-        //             .then(function (oCreatedDoc) {
-        //                 // step 2: binary content (the real File object)
-        //                 return fetch(sServiceUrl + "CaseDocuments(" + oCreatedDoc.ID + ")/content", {
-        //                     method: "PUT",
-        //                     headers: Object.assign(
-        //                         { "Content-Type": oDoc.mimeType || "application/octet-stream" }, oCsrf),
-        //                     body: oDoc.file
-        //                 });
-        //             })
-        //             .then(fnCheck);
-        //         });
-        //     }, Promise.resolve());
-        // },
-
+        onExit: function () {
+            if (this._oReturningDialog) {
+                this._oReturningDialog.close();
+                this._oReturningDialog.destroy();
+                this._oReturningDialog = null;
+            }
+        }
 
     });
 });

@@ -32,12 +32,12 @@
                         </uxap:heading>
 
                         <uxap:expandedContent>
-                            <Text text="{caseReference}"/>
+                            <Text text="{employee/displayName}"/>
                         </uxap:expandedContent>
 
-                        <uxap:snappedContent>
+                        <!-- <uxap:snappedContent>
                             <Text text="{caseReference}"/>
-                        </uxap:snappedContent>
+                        </uxap:snappedContent> -->
 
                         <uxap:actions>
                             <ObjectStatus
@@ -58,7 +58,7 @@
                             text="{path: 'incidentDate', type: 'sap.ui.model.odata.type.Date'}"/>
                         <ObjectAttribute
                             title="{i18n>caseCategory}"
-                            text="{category_categoryID}"/>
+                            text="{category/categoryName}"/>
                     </VBox>
                 </uxap:headerContent>
 
@@ -82,10 +82,10 @@
                                         <Text text="{employee_employeeID}"/>
 
                                         <Label text="{i18n>department}"/>
-                                        <Text text="{department_departmentID}"/>
+                                        <Text text="{department/departmentName}"/>
 
                                         <Label text="{i18n>caseCategory}"/>
-                                        <Text text="{category_categoryID}"/>
+                                        <Text text="{category/categoryName}"/>
 
                                         <Label text="{i18n>caseStatus}"/>
                                         <ObjectStatus
@@ -125,7 +125,7 @@
                                 <uxap:blocks>
                                     <Table
                                         id="supportingDocsTable"
-                                        items="{path: 'documents'}"
+                                        items="{path: ''}"
                                         noDataText="No supporting documents uploaded."
                                         growing="true"
                                         growingThreshold="10">
@@ -219,7 +219,7 @@
 
                                         <!-- Shown when a response exists -->
                                         <form:SimpleForm
-                                            visible="{= !!${} || !!${responseDescription} }"
+                                            visible="{= !!${} || !!${} }"
                                             editable="false" layout="ColumnLayout"
                                             columnsM="1" columnsL="1" columnsXL="2">
                                             <Label text="Response Date"/>
@@ -304,3 +304,4 @@
         </content>
     </Page>
 </mvc:View>
+
